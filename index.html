@@ -186,12 +186,24 @@
   .nav-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:12px 24px}
   .nav .brand{font-family:var(--serif);font-weight:700;font-size:19px;display:flex;align-items:center;gap:8px}
   .nav .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose)}
-  .tabs{margin-left:auto;display:flex;gap:6px;background:#f1edf5;padding:5px;border-radius:999px}
-  .tab{border:0;background:transparent;font-family:var(--sans);font-weight:700;font-size:13px;
-    color:var(--ink-soft);padding:9px 16px;border-radius:999px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+  .tabs{margin-left:auto;display:flex;gap:6px;background:#f1edf5;padding:5px;border-radius:999px;
+    overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{border:0;background:transparent;font-family:var(--sans);font-weight:700;font-size:12.5px;
+    color:var(--ink-soft);padding:8px 14px;border-radius:999px;cursor:pointer;transition:.2s;
+    display:flex;align-items:center;gap:6px;flex:0 0 auto;white-space:nowrap}
   .tab:hover{color:var(--ink)}
   .tab.active{background:#fff;color:var(--rose-d);box-shadow:var(--shadow-sm)}
   .tab[data-flow="C"].active{color:var(--ai-d)}
+
+  /* push notification card */
+  .push{background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:16px;
+    padding:11px 12px;display:flex;gap:10px;text-align:left;width:100%;
+    box-shadow:0 10px 26px -12px rgba(64,30,72,.35)}
+  .push .ic{flex:0 0 auto;width:34px;height:34px;border-radius:10px;background:var(--rose);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:17px}
+  .push>div:last-child{font-size:11.5px;line-height:1.45;color:var(--ink)}
+  .push b{color:var(--ink)}
 
   .section{max-width:1080px;margin:0 auto;padding:64px 24px 40px}
   .flow-head{margin-bottom:28px}
@@ -327,8 +339,10 @@
   <div class="nav-inner">
     <div class="brand"><span class="dot"></span><span class="full">OurSpace</span></div>
     <div class="tabs" role="tablist">
-      <button class="tab active" data-flow="A" role="tab">📍 เพิ่มสถานที่</button>
+      <button class="tab active" data-flow="O" role="tab">✨ เริ่มต้น</button>
+      <button class="tab" data-flow="A" role="tab">📍 สถานที่</button>
       <button class="tab" data-flow="B" role="tab">🎂 วันสำคัญ</button>
+      <button class="tab" data-flow="D" role="tab">📡 เข้าใกล้</button>
       <button class="tab" data-flow="C" role="tab">💔→❤️ AI ง้อ</button>
     </div>
   </div>
@@ -389,6 +403,51 @@ const sc=(inner,cls='')=>`<div class="scr ${cls}">${inner}</div>`;
 
 /* ---------- FLOW DATA ---------- */
 const FLOWS={
+O:{label:'เริ่มต้น',num:'O',accent:'rose',
+  title:'เริ่มต้น — ตั้งค่าความเป็นเรา',
+  desc:'Onboarding ที่เก็บ “ความเป็นเรา” — ชื่อที่เรียกกัน รูปที่มีความหมาย และวันสำคัญตั้งต้น ข้อมูลชุดนี้ไปโผล่ในทุกฟีเจอร์ (แจ้งเตือน/AI/วันสำคัญ)',
+  screens:[
+   {code:'O1',ttl:'ชื่อที่เราเรียกกัน',d:'ใช้ในแจ้งเตือน & AI',
+    html:ab('ตั้งค่าความเป็นเรา','','1/4')+sc(
+     `<div class="emoji">💌</div>
+      <div class="h">เราเรียกกันว่าอะไร?</div>
+      <div class="small">ชื่อนี้จะถูกใช้ในข้อความแจ้งเตือน และเวลาที่ AI พูดถึงกัน</div>
+      <div class="fld" style="width:100%"><div class="l">คุณเรียกเขาว่า</div><div class="v">เบบี๋ 🐻</div></div>
+      <div class="fld" style="width:100%"><div class="l">ให้เขาเรียกคุณว่า</div><div class="v">ปุ้ย 🐰</div></div>
+      <div class="btn tap" style="width:100%;margin-top:auto">ถัดไป</div>`,'center')},
+   {code:'O2',ttl:'รูปที่มีความหมาย',d:'ภาพโปรไฟล์ของเรา',
+    html:ab('ตั้งค่าความเป็นเรา','','2/4')+sc(
+     `<div class="sec">ภาพโปรไฟล์คู่</div>
+      <div class="box" style="height:118px;display:flex;align-items:center;justify-content:center;font-size:34px">🖼️</div>
+      <div class="small">เลือกภาพที่มีความหมายกับเราที่สุด</div>
+      <div class="fld"><div class="l">แคปชั่น (ถ้าอยากใส่)</div><div class="v">ทะเลครั้งแรกของเรา 🌊</div></div>
+      <div class="row"><div class="box tap" style="text-align:center">📷 ถ่าย</div><div class="box tap" style="text-align:center">🖼️ คลังภาพ</div></div>
+      <div class="btn tap" style="margin-top:auto">ถัดไป</div>`)},
+   {code:'O3',ttl:'วันสำคัญตั้งต้น',d:'วันเกิด · วันเจอ · วันเริ่มคบ',
+    html:ab('ตั้งค่าความเป็นเรา','','3/4')+sc(
+     `<div class="sec">ใส่วันสำคัญของเรา</div>
+      <div class="fld"><div class="l">วันเกิดคุณ</div><div class="v">12 มี.ค.</div></div>
+      <div class="fld"><div class="l">วันเกิดเบบี๋</div><div class="v">18 มิ.ย.</div></div>
+      <div class="fld"><div class="l">วันเจอกันครั้งแรก</div><div class="v">14 ก.พ. 2024</div></div>
+      <div class="fld"><div class="l">วันเริ่มคบ</div><div class="v">1 พ.ค. 2024</div></div>
+      <div class="btn tap" style="margin-top:auto">เกือบเสร็จแล้ว →</div>`)},
+   {code:'O4',ttl:'พร้อมแล้ว',d:'สรุป + เริ่มใช้งาน',
+    html:ab('ยินดีต้อนรับ 🎉','rose')+sc(
+     `<div class="emoji">💞</div>
+      <div class="h">เบบี๋ & ปุ้ย</div>
+      <div class="small">วันสำคัญถูกเพิ่มให้อัตโนมัติ 4 รายการ<br>เริ่มเก็บความทรงจำกันเลย</div>
+      <div class="box" style="width:100%">📅 สร้างวันสำคัญ 4 รายการในปฏิทินเรา</div>
+      <div class="btn tap" style="width:100%">เข้าสู่ OurSpace</div>`,'center')},
+  ],
+  notes:[
+   {range:[0,3],seg:'Onboarding — เก็บ “ความเป็นเรา”',cards:[
+    {ct:'📝 ข้อมูลที่เก็บ',li:['<b>ชื่อที่เรียกกัน</b> 2 ทิศ: ฉัน→เขา, เขา→ฉัน','ภาพโปรไฟล์คู่ + แคปชั่น','วันเกิด (ทั้งคู่), วันเจอครั้งแรก, วันเริ่มคบ']},
+    {ct:'⚙️ Logic',li:['ชื่อเรียก = <b>token</b> ใช้ในแจ้งเตือน & ข้อความ AI ทุกที่','วันสำคัญตั้งต้น → สร้าง entry ใน “วันสำคัญ” อัตโนมัติ','ฟิลด์ optional ข้ามได้ แก้ทีหลังใน Settings']},
+    {cls:'edge',ct:'⚠️ Edge cases',li:['ยังไม่จับคู่ → เก็บชื่อ “เขา” ไว้ก่อน เติมเมื่อ pair สำเร็จ','ไม่อัปรูป → ใช้ default avatar คู่','เปลี่ยนชื่อเรียกภายหลัง → อัปเดตทุกที่ที่อ้าง token']},
+    {ct:'🔌 API / Data',api:'PATCH /users/me { callPartner, callMe,\n  birthday, profilePhoto, photoCaption }\nPATCH /couple { firstMet, anniversary }\nPOST  /dates (seed 4 รายการ)'},
+   ]},
+  ]},
+
 A:{label:'เพิ่มสถานที่',num:'A',accent:'rose',
   title:'เพิ่มสถานที่',
   desc:'ปักหมุดความทรงจำของเราลงบนแผนที่ — เลือกวิธี ปรับหมุด ใส่รายละเอียด แล้วผูกเข้าไดอารี่อัตโนมัติ',
@@ -521,6 +580,72 @@ B:{label:'เพิ่มวันสำคัญ',num:'B',accent:'rose',
    ]},
   ]},
 
+D:{label:'เข้าใกล้ที่เคยเดท',num:'D',accent:'rose',
+  title:'แจ้งเตือนเมื่อเข้าใกล้ที่เคยเดท',
+  desc:'ปักหมุดที่ที่เคยไปเดท → เมื่อใครเข้าใกล้รัศมี ระบบเด้งเตือน 2 ฝั่ง: คนที่ผ่าน (รำลึกความหลัง) และอีกฝ่าย (รู้ว่าเขาคิดถึง)',
+  screens:[
+   {code:'D1',ttl:'ปักหมุดที่เคยเดท',d:'ทำเครื่องหมายว่าเป็นที่เดท',
+    html:ab('‹ ที่เคยเดท')+sc(
+     `<div class="map" style="flex:none;height:140px"><span class="pin" style="top:38%;left:46%;font-size:28px">💕</span></div>
+      <div class="fld"><div class="l">สถานที่</div><div class="v">ร้านชาบู สาขาสยาม 🍲</div></div>
+      <div class="box sel">💕 นี่คือที่ที่เราเคยมาเดทกัน ✓</div>
+      <div class="fld"><div class="l">ความทรงจำ</div><div class="v">เดทครั้งที่ 3 · กินจนพุงกาง</div></div>
+      <div class="btn tap" style="margin-top:auto">ตั้งแจ้งเตือนเข้าใกล้ →</div>`)},
+   {code:'D2',ttl:'ตั้งรัศมี + ใครเด้ง',d:'รัศมี · ทริกเกอร์ · แจ้งใคร',
+    html:ab('‹ แจ้งเตือนเข้าใกล้')+sc(
+     `<div class="box sel">🔔 เปิดแจ้งเตือนเมื่อเข้าใกล้ ✓</div>
+      <div class="sec">รัศมี</div>
+      <div class="slider"></div>
+      <div class="small spread"><span>100 ม.</span><span>300 ม.</span><span>1 กม.</span></div>
+      <div class="sec">ใครเข้าใกล้แล้วเด้ง</div>
+      <div class="chips"><span class="chip">ฉัน</span><span class="chip">แฟน</span><span class="chip on">ทั้งคู่</span></div>
+      <div class="sec">แจ้งใคร</div>
+      <div class="chips"><span class="chip on">คนที่ผ่าน</span><span class="chip on">อีกฝ่าย</span></div>
+      <div class="btn tap" style="margin-top:auto">บันทึก</div>`)},
+   {code:'D3',ttl:'🔔 ฝั่งคนที่กำลังผ่าน',d:'รำลึกความหลัง',
+    html:ab('','bare')+sc(
+     `<div class="exp" style="justify-content:flex-start;padding-top:26px;gap:14px">
+        <div class="small" style="align-self:center;opacity:.7">หน้าจอล็อก · ตอนนี้</div>
+        <div class="push">
+          <div class="ic">💞</div>
+          <div><b>OurSpace</b> · เดี๋ยวนี้<br>📍 คุณกำลังผ่านที่ที่เคยมาเดทกับ <b>เบบี๋</b> 💕<br><span class="small">แวะรำลึกความหลังกันไหม?</span></div>
+        </div>
+        <div class="coupon tap" style="background:rgba(255,255,255,.92)">แตะเปิดความทรงจำ</div>
+        <div class="small" style="align-self:center">รูปแบบ: “คุณผ่านที่ที่เคยเดทกับ {ชื่อเล่นแฟน} {emoji คู่รักสุ่ม}”</div>
+      </div>`,'pad0')},
+   {code:'D4',ttl:'🔔 ฝั่งอีกฝ่าย (อยู่ที่อื่น)',d:'รู้ว่าเขาผ่านที่ของเรา',
+    html:ab('','bare')+sc(
+     `<div class="exp" style="justify-content:flex-start;padding-top:26px;gap:14px;background:radial-gradient(125% 100% at 50% 0%,#f4ebff 0%,#ffe6f1 100%)">
+        <div class="small" style="align-self:center;opacity:.7">หน้าจอล็อก · ตอนนี้</div>
+        <div class="push">
+          <div class="ic" style="background:var(--ai)">💌</div>
+          <div><b>OurSpace</b> · เดี๋ยวนี้<br>💞 <b>ปุ้ย</b> เพิ่งผ่านที่ที่เราเคยมาเดทกัน…<br><span class="small">ทักไปบอกว่าคิดถึงไหม?</span></div>
+        </div>
+        <div class="small" style="align-self:center">รูปแบบ: “{ชื่อ} ผ่านสถานที่ ที่เราเคย… {emoji คู่รักสุ่ม}”</div>
+      </div>`,'pad0')},
+   {code:'D5',ttl:'เปิดดูความทรงจำ',d:'แตะ push → การ์ดความทรงจำ',
+    html:ab('ความทรงจำของเรา 💕','rose')+sc(
+     `<div class="box" style="width:100%;text-align:left">
+        <div style="height:74px;background:#f0e6ef;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px">🖼️</div>
+        <div class="ttl" style="margin-top:6px">ร้านชาบู สาขาสยาม</div>
+        <div class="small">เดทครั้งที่ 3 · 20 ก.พ. 2024 · กินจนพุงกาง</div></div>
+      <div class="row" style="width:100%"><div class="btn line tap">💬 บอกว่าคิดถึง</div><div class="btn tap">📅 ชวนมาอีก</div></div>`,'center')},
+  ],
+  notes:[
+   {range:[0,1],seg:'ตั้งค่า — ปักหมุด & รัศมี',cards:[
+    {ct:'📝 ตั้งค่า',li:['ทำเครื่องหมาย “ที่เคยเดท” บนสถานที่','รัศมี (slider 100 ม.–1 กม.)','ใครเข้าใกล้แล้วเด้ง: ฉัน / แฟน / ทั้งคู่','แจ้งใคร: คนที่ผ่าน + อีกฝ่าย (เลือกได้)']},
+    {ct:'⚙️ Logic',li:['ใช้ OS geofence (ประหยัดแบต) + รัศมีขั้นต่ำ ~100 ม.','debounce กันเด้งรัวตอนเข้า-ออกถี่','เลือกข้อความคนละแบบตาม “เป็นคนผ่าน” หรือ “อีกฝ่าย”']},
+    {cls:'edge',ct:'⚠️ Privacy',li:['“แจ้งอีกฝ่ายว่าคุณผ่าน” = แชร์ตำแหน่ง → ต้อง consent 2 ฝ่าย','ปิด/หยุดชั่วคราวได้ตลอด','quiet hours + จำกัดความถี่ต่อวัน']},
+    {ct:'🔌 API / Data',api:'POST /geofences { placeId, radius,\n  triggerBy, notify:[passer,partner],\n  isDateSpot:true }\nplace.memoryTags += "date"'},
+   ]},
+   {range:[2,4],seg:'ข้อความแจ้งเตือน 2 ฝั่ง',cards:[
+    {ct:'📨 ข้อความ (มี token)',li:['<b>คนที่ผ่าน:</b> “คุณผ่านที่ที่เคยเดทกับ <b>{ชื่อเล่นแฟน}</b> {loverEmoji}”','<b>อีกฝ่าย:</b> “<b>{ชื่อ}</b> ผ่านสถานที่ที่เราเคย{memoryTag} {loverEmoji}”','{loverEmoji} = สุ่มจาก 💕 💞 💗 ❤️ 🥰 💑 💌']},
+    {cls:'ai-col',ct:'✨ ปรับด้วย AI (เฟส 2)',li:['AI แต่งข้อความให้สดใหม่ทุกครั้ง (ไม่ซ้ำ)','โยงความทรงจำของที่นั้น (วันที่/โน้ต) เข้ากับข้อความ']},
+    {ct:'🎯 ปลายทางการกด',li:['แตะ push → การ์ดความทรงจำของที่นั้น','ปุ่ม “บอกว่าคิดถึง” (→ แชท) / “ชวนมาอีก” (→ สร้างเดท/วันสำคัญ)']},
+    {ct:'🔌 API / Data',api:'(geofence trigger) → resolve template\n→ FCM 2 ฝั่ง (ข้อความต่างกัน)\nGET /places/:id/memory  (เปิดการ์ด)'},
+   ]},
+  ]},
+
 C:{label:'AI ง้อ',num:'C',accent:'ai',
   title:'AI ง้อ — สร้างประสบการณ์คืนดี',
   desc:'ฟีเจอร์เด่น: บอกบริบทให้ AI → AI วิเคราะห์แฟนจากโปรไฟล์ → สร้าง “ประสบการณ์ง้อ” เปิดทีละชั้น ส่งให้อีกฝ่าย → ปิด loop ด้วยการคืนดีจริง',
@@ -646,7 +771,7 @@ C:{label:'AI ง้อ',num:'C',accent:'ai',
 };
 
 /* ---------- ENGINE ---------- */
-const state={flow:'A',idx:0};
+const state={flow:'O',idx:0};
 const $=id=>document.getElementById(id);
 const screenEl=$('screen'),capEl=$('cap'),dotsNav=$('dotsNav'),
       progEl=$('progress'),notesWrap=$('notesWrap'),
