@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>OurSpace — Interactive Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2b2438; --ink-soft:#473e54; --muted:#6b6379; --line:#e7e2ee;
+    --bg:#fbf8fc; --surface:#ffffff;
+    --rose:#ff4d83; --rose-d:#d8336a; --rose-l:#fff1f6; --rose-bd:#ffd0e0;
+    --ai:#7c5cff; --ai-d:#5b3be0; --ai-l:#f1ecff; --ai-bd:#ddd1ff;
+    --ok:#11a06a; --warn:#d98300;
+    --dusk1:#2a1840; --dusk2:#5b2a63; --dusk3:#a8385f;
+    --serif:"Noto Serif Thai",Georgia,serif;
+    --sans:"Noto Sans Thai",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --shadow:0 24px 60px -20px rgba(64,30,72,.35);
+    --shadow-sm:0 6px 20px -8px rgba(64,30,72,.25);
+  }
+  *{box-sizing:border-box}
+  :root{color-scheme:only light}
+  html{scroll-behavior:smooth;background:var(--bg)}
+  body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);
+    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+  /* ============ HERO ============ */
+  .hero{position:relative;min-height:94vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;
+    background:radial-gradient(125% 95% at 50% -8%,#ffe1ec 0%,#fbecf6 34%,var(--bg) 74%);
+    color:var(--ink);overflow:hidden}
+  .stars{display:none}
+  .glow{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(64px);
+    background:radial-gradient(circle,rgba(255,120,170,.32),rgba(255,150,190,.1) 55%,transparent 72%);
+    top:64%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+
+  .hero .eyebrow{font-size:13px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--rose-d);font-weight:700;margin:0 0 14px;opacity:0;animation:rise .8s .1s forwards}
+  .hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(44px,8vw,86px);
+    line-height:1.02;margin:0;letter-spacing:-1px;opacity:0;animation:rise .8s .2s forwards}
+  .hero h1 .amp{color:var(--rose);font-style:italic}
+  .hero .lede{max-width:560px;margin:20px auto 0;font-size:clamp(15px,2vw,18px);
+    color:var(--ink-soft);line-height:1.7;opacity:0;animation:rise .8s .35s forwards}
+  .hero-phone{margin-top:46px;opacity:0;animation:rise 1s .5s forwards}
+  .hero-cta{margin-top:40px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+    opacity:0;animation:rise .8s .65s forwards}
+  .hero-cta a{text-decoration:none;font-weight:700;font-size:14px;padding:13px 24px;border-radius:999px;transition:.25s}
+  .hero-cta .primary{background:var(--rose);color:#fff;box-shadow:0 12px 26px -10px rgba(255,77,131,.6)}
+  .hero-cta .primary:hover{transform:translateY(-2px);box-shadow:0 18px 34px -10px rgba(255,77,131,.55)}
+  .hero-cta .ghost{background:#fff;color:var(--rose-d);border:1.5px solid var(--rose-bd)}
+  .hero-cta .ghost:hover{background:var(--rose-l);border-color:var(--rose)}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes tw{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:.9;transform:scale(1.3)}}
+
+  /* floating envelope phone in hero */
+  .floatphone{width:230px;animation:float 5.5s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  /* hero phone: dark bezel reads well on the light hero, soft halo to lift it */
+  .hero .device{
+    box-shadow:0 34px 70px -24px rgba(90,40,100,.45),
+      0 0 0 1px rgba(0,0,0,.04),
+      0 0 70px 6px rgba(255,150,190,.25);
+    background:linear-gradient(160deg,#3a3340,#1c181f)}
+  .hero .screen{background:#fff}
+
+  /* ============ DEVICE ============ */
+  .device{width:300px;border-radius:42px;padding:11px;background:linear-gradient(160deg,#3a3340,#1c181f);
+    box-shadow:var(--shadow),inset 0 0 0 2px rgba(255,255,255,.06);position:relative}
+  .device.sm{width:230px;border-radius:34px;padding:9px}
+  .device .island{position:absolute;top:20px;left:50%;transform:translateX(-50%);
+    width:78px;height:22px;background:#0c0a0e;border-radius:999px;z-index:5}
+  .device.sm .island{width:60px;height:17px;top:16px}
+  .screen{position:relative;border-radius:32px;overflow:hidden;background:#fdfbff;
+    aspect-ratio:300/640;display:flex;flex-direction:column}
+  .device.sm .screen{border-radius:26px}
+
+  /* app bar */
+  .ab{flex:0 0 auto;min-height:46px;display:flex;align-items:center;gap:7px;
+    padding:14px 14px 8px;font-size:13px;font-weight:700;color:var(--ink);background:#fff;
+    border-bottom:1px solid var(--line)}
+  .ab .r{margin-left:auto;font-weight:600;font-size:12px;color:var(--muted)}
+  .ab.rose{background:linear-gradient(135deg,#ff7aa6,#ff4d83);color:#fff;border:0}
+  .ab.rose .r{color:rgba(255,255,255,.85)}
+  .ab.ai{background:linear-gradient(135deg,#9170ff,#6d3bff);color:#fff;border:0}
+  .ab.bare{background:transparent;border:0;color:transparent;min-height:30px}
+
+  .scr{flex:1;padding:14px;display:flex;flex-direction:column;gap:9px;overflow-y:auto}
+  .scr.pad0{padding:0}
+  .scr.center{align-items:center;text-align:center;justify-content:center;gap:11px}
+  .scr::-webkit-scrollbar{width:0}
+
+  /* components */
+  .sec{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.6px;margin-top:3px}
+  .box{background:#f6f4fa;border:1px solid var(--line);border-radius:12px;padding:11px 12px;
+    font-size:12.5px;color:var(--ink-soft);line-height:1.45;transition:.18s}
+  .box.sel{border-color:var(--rose);background:var(--rose-l);color:var(--rose-d);font-weight:700;
+    box-shadow:0 0 0 3px rgba(255,77,131,.1)}
+  .box.tap{cursor:pointer}
+  .box.tap:hover{border-color:var(--rose);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+  .box .ttl{font-weight:800;color:var(--ink);font-size:13px}
+  .fld{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+  .fld .l{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+  .fld .v{font-size:14px;color:var(--ink);margin-top:2px;font-weight:600}
+  .row{display:flex;gap:8px}.row>*{flex:1;margin:0}
+  .btn{background:var(--rose);color:#fff;border:0;border-radius:12px;padding:13px;
+    text-align:center;font-size:13px;font-weight:800;font-family:var(--sans);cursor:pointer;transition:.2s;width:100%}
+  .btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+  .btn.line{background:#fff;border:1.6px solid var(--rose);color:var(--rose)}
+  .btn.dark{background:#1c1c22}
+  .btn.ai{background:linear-gradient(135deg,#9170ff,#6d3bff)}
+  .btn.ok{background:var(--ok)}
+  .btn.ghost{background:#efecf4;color:var(--ink-soft)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;
+    font-size:11.5px;color:var(--ink-soft);cursor:pointer;transition:.18s}
+  .chip:hover{border-color:var(--rose);color:var(--rose)}
+  .chip.on{background:var(--rose);color:#fff;border-color:var(--rose);font-weight:700}
+  .chip.ai{background:var(--ai-l);border-color:var(--ai-bd);color:var(--ai-d);font-weight:700}
+  .chip.ai:hover{background:var(--ai);color:#fff}
+  .small{font-size:11px;color:var(--muted);line-height:1.5}
+  .h{font-size:16px;font-weight:800;font-family:var(--serif)}
+  .big{font-size:30px;font-weight:800;color:var(--rose);font-family:var(--serif);line-height:1}
+  .emoji{font-size:42px;line-height:1}
+  .slider{height:7px;background:linear-gradient(90deg,#ffd1df,var(--rose));border-radius:9px;position:relative;margin:6px 2px}
+  .slider::after{content:"";position:absolute;left:62%;top:50%;transform:translate(-50%,-50%);
+    width:18px;height:18px;background:#fff;border:3px solid var(--rose);border-radius:50%;
+    box-shadow:0 3px 8px rgba(255,77,131,.4)}
+  .spread{display:flex;justify-content:space-between}
+
+  /* map */
+  .map{flex:1;min-height:180px;border-radius:14px;position:relative;overflow:hidden;
+    background:linear-gradient(0deg,#e4ede6 1px,transparent 1px) 0 0/100% 30px,
+      linear-gradient(90deg,#e4ede6 1px,transparent 1px) 0 0/30px 100%,#f1f7f2}
+  .map .road{position:absolute;background:#d9e6db}
+  .pin{position:absolute;font-size:20px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.2))}
+  .fab{position:absolute;right:14px;bottom:14px;width:46px;height:46px;border-radius:50%;
+    background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:26px;font-weight:300;box-shadow:0 8px 20px -4px rgba(255,77,131,.6);cursor:pointer}
+  .fab:hover{transform:scale(1.06)}
+
+  /* ai cards */
+  .ai-card{background:var(--ai-l);border:1px solid var(--ai-bd);border-radius:13px;padding:11px;
+    font-size:12px;color:#46357f;line-height:1.55}
+  .ai-card .t{font-weight:800;color:var(--ai-d);font-size:12.5px;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+  .ai-card b{color:var(--ai-d)}
+  .dots span{display:inline-block;width:7px;height:7px;background:var(--ai);border-radius:50%;margin:0 1px;
+    animation:bounce 1.2s infinite}
+  .dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+  @keyframes bounce{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+  .tip{background:linear-gradient(135deg,var(--ai-l),#faf7ff);border:1px solid var(--ai-bd);
+    border-radius:13px;padding:11px;font-size:12px;color:#46357f;line-height:1.55}
+
+  /* receiver experience (light romantic) */
+  .exp{flex:1;min-height:230px;border-radius:18px;color:var(--ink);position:relative;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:18px;
+    background:radial-gradient(125% 100% at 50% 0%,#ffe6f1 0%,#f4ebff 100%);
+    border:1px solid #f3dce8}
+  .exp .star{position:absolute;color:var(--rose);font-size:12px;opacity:.55;animation:tw 3s ease-in-out infinite}
+  .exp .envelope{font-size:60px;animation:float 4s ease-in-out infinite;
+    filter:drop-shadow(0 6px 12px rgba(216,51,106,.25))}
+  .exp .ex-txt{font-size:13px;padding:0 10px;line-height:1.5;font-weight:600;color:var(--rose-d)}
+  .layerstack{position:relative;width:160px;height:120px;margin:4px 0}
+  .layerstack .lyr{position:absolute;left:0;right:0;background:rgba(255,255,255,.92);
+    border:1px solid var(--rose-bd);border-radius:11px;padding:9px;font-size:11px;color:var(--ink);
+    text-align:center;box-shadow:0 6px 16px -8px rgba(216,51,106,.3)}
+  .layerstack .lyr:nth-child(1){top:0;transform:scale(.88);opacity:.5}
+  .layerstack .lyr:nth-child(2){top:20px;transform:scale(.94);opacity:.78}
+  .layerstack .lyr:nth-child(3){top:44px}
+  .coupon{background:#fff;color:var(--rose-d);border:1.6px dashed var(--rose);border-radius:11px;
+    padding:9px 11px;font-size:12px;font-weight:700;text-align:center;box-shadow:0 6px 16px -8px rgba(216,51,106,.25)}
+  .exp .btn{width:auto;padding:11px 26px}
+  .exp .small{color:var(--ink-soft)}
+
+  /* screen entrance animation */
+  .screen-enter{animation:scrIn .42s cubic-bezier(.2,.7,.2,1)}
+  @keyframes scrIn{from{opacity:0;transform:translateY(10px) scale(.992)}to{opacity:1;transform:none}}
+
+  /* ============ STAGE / NAV ============ */
+  .nav{position:sticky;top:0;z-index:40;background:rgba(251,248,252,.86);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line)}
+  .nav-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:12px 24px}
+  .nav .brand{font-family:var(--serif);font-weight:700;font-size:19px;display:flex;align-items:center;gap:8px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--rose)}
+  .tabs{margin-left:auto;display:flex;gap:6px;background:#f1edf5;padding:5px;border-radius:999px}
+  .tab{border:0;background:transparent;font-family:var(--sans);font-weight:700;font-size:13px;
+    color:var(--ink-soft);padding:9px 16px;border-radius:999px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+  .tab:hover{color:var(--ink)}
+  .tab.active{background:#fff;color:var(--rose-d);box-shadow:var(--shadow-sm)}
+  .tab[data-flow="C"].active{color:var(--ai-d)}
+
+  .section{max-width:1080px;margin:0 auto;padding:64px 24px 40px}
+  .flow-head{margin-bottom:28px}
+  .flow-head .kicker{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:800;
+    letter-spacing:1px;text-transform:uppercase;color:var(--rose-d);margin-bottom:10px}
+  .flow-head .kicker .num{background:var(--rose);color:#fff;width:26px;height:26px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-size:13px}
+  .flow-head.ai .kicker{color:var(--ai-d)}.flow-head.ai .kicker .num{background:var(--ai)}
+  .flow-head h2{font-family:var(--serif);font-weight:700;font-size:clamp(28px,4.5vw,42px);
+    margin:0;letter-spacing:-.5px;line-height:1.1}
+  .flow-head p{margin:10px 0 0;color:var(--ink-soft);max-width:560px;font-size:16px}
+
+  .stage{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:start}
+  .stage-phone{display:flex;flex-direction:column;align-items:center;gap:18px;position:sticky;top:88px}
+
+  .step-cap{text-align:center;min-height:48px}
+  .step-cap .code{font-family:var(--serif);font-weight:700;color:var(--rose);font-size:13px;letter-spacing:1px}
+  .ai .step-cap .code{color:var(--ai)}
+  .step-cap .ttl{font-weight:800;font-size:15px;margin-top:2px}
+  .step-cap .d{color:var(--muted);font-size:12.5px;margin-top:1px}
+
+  .controls{display:flex;align-items:center;gap:14px}
+  .ctrl{width:46px;height:46px;border-radius:50%;border:1.6px solid var(--line);background:#fff;
+    color:var(--ink);font-size:18px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center}
+  .ctrl:hover:not(:disabled){border-color:var(--rose);color:var(--rose);transform:translateY(-1px)}
+  .ctrl:disabled{opacity:.35;cursor:default}
+  .dots-nav{display:flex;gap:7px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line);border:0;cursor:pointer;transition:.2s;padding:0}
+  .dot:hover{background:var(--rose-bd)}
+  .dot.on{background:var(--rose);transform:scale(1.25)}
+  .ai .dot.on{background:var(--ai)}
+  .progress-txt{font-size:12px;color:var(--muted);font-weight:700;min-width:54px;text-align:center}
+
+  /* notes panel */
+  .notes-wrap{padding-top:6px}
+  .notes-seg{font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+    color:var(--muted);margin:0 0 16px;display:flex;align-items:center;gap:10px}
+  .notes-seg::before{content:"";width:24px;height:2px;background:var(--rose);border-radius:2px}
+  .ai .notes-seg::before{background:var(--ai)}
+  .ncards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .ncard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;
+    box-shadow:0 2px 10px -6px rgba(64,30,72,.15)}
+  .ncard .ct{font-size:13px;font-weight:800;margin:0 0 9px;display:flex;align-items:center;gap:8px}
+  .ncard.edge .ct{color:var(--warn)}
+  .ncard.ai-col .ct{color:var(--ai-d)}
+  .ncard ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-soft);line-height:1.65}
+  .ncard ul li{margin-bottom:5px}
+  .ncard b{color:var(--ink)}
+  .api{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:#f6f4fa;
+    border:1px solid var(--line);border-radius:11px;padding:12px;color:var(--ink-soft);line-height:1.7;
+    white-space:pre-wrap;word-break:break-word}
+
+  .legend{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin-top:30px;
+    font-size:13px;color:var(--ink-soft)}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .legend .sw{width:14px;height:14px;border-radius:4px}
+
+  footer{text-align:center;padding:50px 24px 60px;color:var(--muted);font-size:13px}
+  footer .fb{font-family:var(--serif);font-size:17px;color:var(--ink);margin-bottom:6px}
+
+  @media (max-width:860px){
+    .stage{grid-template-columns:1fr;gap:36px}
+    .stage-phone{position:static}
+    .ncards{grid-template-columns:1fr}
+    .section{padding:48px 18px 30px}
+    .nav .brand span.full{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto}
+    .hero .eyebrow,.hero h1,.hero .lede,.hero-phone,.hero-cta{opacity:1}
+  }
+  .ctrl:focus-visible,.tab:focus-visible,.dot:focus-visible,.box.tap:focus-visible,.fab:focus-visible{
+    outline:3px solid var(--ai);outline-offset:2px}
+
+  /* Force a single LIGHT theme even when the device / in-app browser is in dark mode.
+     Declaring dark-mode rules (kept identical to light) tells the browser the page
+     handles its own theming, which disables automatic dark-darkening. */
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ink:#2b2438; --ink-soft:#473e54; --muted:#6b6379; --line:#e7e2ee;
+      --bg:#fbf8fc; --surface:#ffffff;
+      --rose:#ff4d83; --rose-d:#d8336a; --rose-l:#fff1f6; --rose-bd:#ffd0e0;
+      --ai:#7c5cff; --ai-d:#5b3be0; --ai-l:#f1ecff; --ai-bd:#ddd1ff;
+      --ok:#11a06a; --warn:#d98300;
+    }
+    html,body{background:#fbf8fc!important;color:#2b2438!important}
+    .section,.notes-wrap,.flow-head,main,footer{background:transparent!important}
+    .flow-head h2{color:#2b2438!important}
+    .flow-head p,.step-cap .d,.small,.progress-txt{color:#6b6379!important}
+    .ncard{background:#fff!important}
+    .box{background:#f6f4fa!important;color:#473e54!important}
+    .fld,.device .screen,.ab{background:#fff!important}
+    .scr{background:transparent!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="stars" id="stars"></div>
+  <div class="glow"></div>
+  <p class="eyebrow">Interactive Prototype · แอปคู่รัก</p>
+  <h1>Our<span class="amp">Space</span></h1>
+  <p class="lede">พื้นที่ของเราสองคน — เก็บสถานที่ความทรงจำ นับถอยหลังวันสำคัญ และเมื่อมีงอน ให้ AI ช่วยสร้าง “ประสบการณ์ง้อ” ที่เปิดทีละชั้น</p>
+  <div class="hero-phone">
+    <div class="device sm floatphone" aria-hidden="true">
+      <div class="island"></div>
+      <div class="screen">
+        <div class="ab bare">　</div>
+        <div class="scr pad0" style="padding:8px">
+          <div class="exp">
+            <span class="star" style="top:16px;left:22px">✦</span>
+            <span class="star" style="top:34px;right:28px;animation-delay:.6s">✦</span>
+            <span class="star" style="bottom:40px;left:34px;animation-delay:1.1s">✦</span>
+            <span class="star" style="bottom:22px;right:30px;animation-delay:.3s">✧</span>
+            <div class="envelope">💌</div>
+            <div class="ex-txt">แฟนมีอะไรอยากบอก…</div>
+            <div class="coupon" style="background:rgba(255,255,255,.92)">แตะเพื่อเปิดซอง</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-cta">
+    <a href="#explore" class="primary">เริ่มดูทีละ flow ↓</a>
+    <a href="#flow-C" class="ghost">✨ ดูฟีเจอร์ AI ง้อ</a>
+  </div>
+</header>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="explore">
+  <div class="nav-inner">
+    <div class="brand"><span class="dot"></span><span class="full">OurSpace</span></div>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-flow="A" role="tab">📍 เพิ่มสถานที่</button>
+      <button class="tab" data-flow="B" role="tab">🎂 วันสำคัญ</button>
+      <button class="tab" data-flow="C" role="tab">💔→❤️ AI ง้อ</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ STAGE ============ -->
+<main class="section">
+  <div class="flow-head" id="flowHead">
+    <div class="kicker"><span class="num" id="khNum">A</span><span id="khKicker">FLOW A</span></div>
+    <h2 id="khTitle">เพิ่มสถานที่</h2>
+    <p id="khDesc">ปักหมุดความทรงจำของเราลงบนแผนที่ — เลือกวิธี ปรับหมุด ใส่รายละเอียด แล้วผูกเข้าไดอารี่อัตโนมัติ</p>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="stage-phone">
+      <div class="device" id="device">
+        <div class="island"></div>
+        <div class="screen" id="screen"><!-- injected --></div>
+      </div>
+      <div class="step-cap" id="cap"></div>
+      <div class="controls">
+        <button class="ctrl" id="prev" aria-label="ก่อนหน้า">‹</button>
+        <div class="dots-nav" id="dotsNav"></div>
+        <button class="ctrl" id="next" aria-label="ถัดไป">›</button>
+      </div>
+      <div class="progress-txt" id="progress"></div>
+    </div>
+
+    <div class="notes-wrap" id="notesWrap"><!-- injected --></div>
+  </div>
+
+  <div class="legend">
+    <span><span class="sw" style="background:var(--rose)"></span> สถานะถูกเลือก</span>
+    <span><span class="sw" style="background:var(--ai)"></span> ส่วนที่ AI ทำงาน</span>
+    <span><span class="sw" style="background:var(--warn)"></span> Edge case ที่ต้องกันไว้</span>
+    <span>💡 แตะปุ่มหลักบนจอ เพื่อไปสเต็ปถัดไป</span>
+  </div>
+</main>
+
+<footer>
+  <div class="fb">บุญจริง ไม่ใช่แค่โอนเงิน — เอ้ย, รักจริง ไม่ใช่แค่พิมพ์ขอโทษ 💞</div>
+  prototype แบบ interactive · คลิก/ลูกศรซ้าย-ขวาเพื่อเดินเรื่อง · ทุก flow ทำงานได้จริงในเบราว์เซอร์
+</footer>
+
+<script>
+/* ---------- force light surfaces (defends against in-app dark mode) ---------- */
+(function(){
+  try{
+    document.documentElement.style.backgroundColor='#fbf8fc';
+    document.body.style.backgroundColor='#fbf8fc';
+    document.body.style.color='#2b2438';
+  }catch(e){}
+})();
+
+/* ---------- screen helpers ---------- */
+const ab=(t,cls='',r='')=>`<div class="ab ${cls}">${t}${r?`<span class="r">${r}</span>`:''}</div>`;
+const sc=(inner,cls='')=>`<div class="scr ${cls}">${inner}</div>`;
+
+/* ---------- FLOW DATA ---------- */
+const FLOWS={
+A:{label:'เพิ่มสถานที่',num:'A',accent:'rose',
+  title:'เพิ่มสถานที่',
+  desc:'ปักหมุดความทรงจำของเราลงบนแผนที่ — เลือกวิธี ปรับหมุด ใส่รายละเอียด แล้วผูกเข้าไดอารี่อัตโนมัติ',
+  screens:[
+   {code:'A1',ttl:'แผนที่หมุด',d:'แตะปุ่ม + เพื่อเพิ่ม',
+    html:ab('สถานที่ของเรา','','12 หมุด')+sc(
+     `<div class="map">
+        <span class="pin" style="top:18%;left:20%">📍</span>
+        <span class="pin" style="top:42%;left:62%">📍</span>
+        <span class="pin" style="top:64%;left:32%">❤️</span>
+        <div class="fab tap">+</div>
+      </div>`,'pad0')},
+   {code:'A2',ttl:'เลือกวิธีบันทึก',d:'4 ทางเลือก',
+    html:ab('‹ เพิ่มสถานที่')+sc(
+     `<div class="sec">บันทึกจาก</div>
+      <div class="box sel">📍 ตำแหน่งปัจจุบัน</div>
+      <div class="box tap">🔎 ค้นหาชื่อสถานที่</div>
+      <div class="box tap">🗺️ ปักหมุดบนแผนที่เอง</div>
+      <div class="box tap">🖼️ จากรูปภาพ (อ่านพิกัด EXIF)</div>
+      <div class="small">เลือกวิธีที่สะดวกที่สุด</div>`)},
+   {code:'A3',ttl:'ปรับหมุด + ที่อยู่อัตโนมัติ',d:'reverse-geocode',
+    html:ab('‹ ปรับตำแหน่ง')+sc(
+     `<div class="map" style="flex:none;height:210px">
+        <span class="pin" style="top:42%;left:46%;font-size:30px">📍</span>
+        <div class="box" style="position:absolute;left:10px;right:10px;bottom:10px;background:#fff">
+          📌 ลากหมุดให้ตรงจุด<div class="ttl">ทะเลหัวหิน, ประจวบฯ</div></div>
+      </div>
+      <div class="btn tap" style="margin-top:auto">ใช้ตำแหน่งนี้</div>`)},
+   {code:'A4',ttl:'กรอกรายละเอียด',d:'ชื่อ · หมวด · วันที่ · รูป',
+    html:ab('‹ รายละเอียดสถานที่')+sc(
+     `<div class="fld"><div class="l">ชื่อสถานที่</div><div class="v">ทะเลหัวหิน 🌊</div></div>
+      <div class="sec">หมวด</div>
+      <div class="chips"><span class="chip on">เที่ยว</span><span class="chip">คาเฟ่</span><span class="chip">ร้านอาหาร</span><span class="chip">พิเศษ</span></div>
+      <div class="fld"><div class="l">วันที่ไป</div><div class="v">12 มิ.ย. 2025</div></div>
+      <div class="row"><div class="box" style="text-align:center">🖼️</div><div class="box" style="text-align:center">🖼️</div><div class="box tap" style="text-align:center">＋</div></div>`)},
+   {code:'A5',ttl:'โน้ต · แท็ก · ตัวเลือกเสริม',d:'ผูกไดอารี่ / geofence',
+    html:ab('‹ รายละเอียดสถานที่')+sc(
+     `<div class="fld"><div class="l">โน้ตความทรงจำ</div><div class="v">ทริปแรกของเรา ❤️</div></div>
+      <div class="sec">แท็กความทรงจำ</div>
+      <div class="chips"><span class="chip on">ที่แรกที่ไปด้วยกัน</span><span class="chip">เดทสุดประทับใจ</span><span class="chip">＋</span></div>
+      <div class="box">⭐ ตั้งเป็นความทรงจำพิเศษ <span class="small">(เฟส 2: เด้งเตือนเมื่อผ่าน)</span></div>
+      <div class="box sel">📔 โพสต์ลงไดอารี่ด้วย ✓</div>
+      <div class="btn tap" style="margin-top:auto">บันทึกสถานที่</div>`)},
+   {code:'A6',ttl:'บันทึกสำเร็จ',d:'หมุด + ไดอารี่ + แจ้งคู่',
+    html:ab('บันทึกแล้ว 🎉','rose')+sc(
+     `<div class="emoji">📍</div>
+      <div class="h">เพิ่ม “ทะเลหัวหิน” แล้ว</div>
+      <div class="small">หมุดขึ้นบนแผนที่ของเรา<br>และสร้างโพสต์ไดอารี่ให้อัตโนมัติ</div>
+      <div class="box" style="width:100%">👫 แจ้งแฟนแล้วว่าเพิ่มที่ใหม่</div>
+      <div class="btn line tap" style="width:100%">ดูบนแผนที่ ↺</div>`,'center')},
+  ],
+  notes:[
+   {range:[0,2],seg:'เลือกวิธี & ปักหมุด',cards:[
+    {ct:'🎛️ ทางเลือกการบันทึก',li:['<b>ตำแหน่งปัจจุบัน</b> — ใช้ GPS ทันที (เร็วสุด)','<b>ค้นหา</b> — autocomplete ผ่าน Places API','<b>ปักเอง</b> — ลากหมุดบนแผนที่','<b>จากรูป</b> — อ่านพิกัด+วันที่จาก EXIF อัตโนมัติ']},
+    {ct:'⚙️ กติกา / Logic',li:['reverse-geocode → เติมชื่อ/ที่อยู่ให้','เช็คหมุดซ้ำในรัศมี 50 ม. → ถาม “เพิ่มความทรงจำในที่เดิม?”','สถานที่เป็นของ <b>couple</b> เห็นทั้งคู่เสมอ']},
+    {cls:'edge',ct:'⚠️ Edge cases',li:['ไม่ให้สิทธิ์ GPS → fallback ไปค้นหา/ปักเอง','ออฟไลน์ → คิวไว้ sync เมื่อกลับมาออนไลน์','รูปไม่มี EXIF → ขอให้ปักหมุดเอง']},
+    {ct:'🔌 API / Data',api:'GET /places/search?q=\nPOST /places/from-photo (exif)\n\nplace: {coupleId, name,\n  location:{Point,[lng,lat]},\n  source, address}'},
+   ]},
+   {range:[3,5],seg:'ฟอร์ม & การบันทึก',cards:[
+    {ct:'📝 ฟิลด์ที่กรอก',li:['ชื่อ (จำเป็น), หมวด, วันที่ไป','รูปหลายใบ (อัปผ่าน presigned URL)','โน้ต + แท็กความทรงจำ (เพิ่มเองได้)','เรตติ้ง ⭐ (optional), ใครชวนมา']},
+    {ct:'⚙️ ตัวเลือกเสริม',li:['<b>ตั้งเป็นความทรงจำพิเศษ</b> → สร้าง geofence (เฟส 2)','<b>โพสต์ลงไดอารี่</b> → สร้าง entry ผูก placeId อัตโนมัติ','บันทึกเสร็จ → push หาแฟน “เพิ่มที่ใหม่”']},
+    {cls:'edge',ct:'⚠️ Edge cases',li:['อัปรูปล้มเหลว → retry + บันทึก draft ไว้','ปิดแอปกลางคัน → กู้ draft ฟอร์ม','ลบสถานที่ → ถามว่าลบโพสต์ไดอารี่ที่ผูกด้วยไหม']},
+    {ct:'🔌 API / Data',api:'POST /places  (multipart/presigned)\n\n+ category, visitedDate,\n  photos[], memoryTags[],\n  rating?, suggestedBy,\n  isSpecial:bool, diaryLinked'},
+   ]},
+  ]},
+
+B:{label:'เพิ่มวันสำคัญ',num:'B',accent:'rose',
+  title:'เพิ่มวันสำคัญ',
+  desc:'นับถอยหลังครบรอบและวันเกิด — เลือกประเภท ตั้งการเกิดซ้ำ ตั้งเตือนหลายชั้น แล้วพรีวิวการ์ด countdown',
+  screens:[
+   {code:'B1',ttl:'ลิสต์วันสำคัญ',d:'แตะ ＋',
+    html:ab('วันสำคัญ','','＋')+sc(
+     `<div class="box sel" style="text-align:center"><div class="small">ครบรอบ 14 เดือน</div><div class="big" style="font-size:24px">อีก 23 วัน</div></div>
+      <div class="box">🎂 วันเกิดแฟน · 18 มิ.ย.</div>
+      <div class="box">💍 วันแรกที่เจอ · 1 พ.ค.</div>
+      <div class="btn tap" style="margin-top:auto">＋ เพิ่มวันใหม่</div>`)},
+   {code:'B2',ttl:'เลือกประเภท',d:'มีพรีเซ็ตให้',
+    html:ab('‹ เลือกประเภท')+sc(
+     `<div class="box sel">❤️ ครบรอบความรัก</div>
+      <div class="box tap">🎂 วันเกิด</div>
+      <div class="box tap">💍 วันแรกที่เจอกัน</div>
+      <div class="box tap">🔁 ครบรอบรายเดือน</div>
+      <div class="box tap">✏️ กำหนดเอง</div>`)},
+   {code:'B3',ttl:'วันที่ · เกิดซ้ำ · ไอคอน',d:'ปรับแต่งการ์ด',
+    html:ab('‹ รายละเอียด')+sc(
+     `<div class="fld"><div class="l">ชื่อ</div><div class="v">ครบรอบ 1 ปี 🎉</div></div>
+      <div class="fld"><div class="l">วันที่</div><div class="v">1 ส.ค. 2025</div></div>
+      <div class="sec">การเกิดซ้ำ</div>
+      <div class="chips"><span class="chip on">ทุกปี</span><span class="chip">ทุกเดือน</span><span class="chip">ครั้งเดียว</span></div>
+      <div class="sec">ไอคอน & สี</div>
+      <div class="chips"><span class="chip">🎉</span><span class="chip">❤️</span><span class="chip">🍰</span><span class="chip on">🌹</span></div>
+      <div class="btn tap" style="margin-top:auto">ถัดไป → ตั้งเตือน</div>`)},
+   {code:'B4',ttl:'ตั้งเตือนหลายชั้น',d:'+ แจ้งทั้งคู่',
+    html:ab('‹ การแจ้งเตือน')+sc(
+     `<div class="sec">เตือนล่วงหน้า (เลือกได้หลายอัน)</div>
+      <div class="box sel">✓ วันนั้นเลย</div>
+      <div class="box sel">✓ 1 วันก่อน</div>
+      <div class="box">3 วันก่อน</div>
+      <div class="box sel">✓ 1 สัปดาห์ก่อน</div>
+      <div class="fld"><div class="l">เวลาแจ้ง</div><div class="v">09:00 น.</div></div>
+      <div class="box sel">👫 แจ้งทั้งสองคน ✓</div>
+      <div class="btn tap" style="margin-top:auto">ดูพรีวิว</div>`)},
+   {code:'B5',ttl:'พรีวิว countdown',d:'เห็นการ์ดจริง',
+    html:ab('‹ พรีวิว')+sc(
+     `<div class="box sel" style="width:100%;text-align:center">
+        <div style="font-size:28px">🌹</div><div class="h">ครบรอบ 1 ปี</div><div class="big">อีก 45 วัน</div></div>
+      <div class="small" style="text-align:left;width:100%">🔔 เตือน: 25 ก.ค. · 31 ก.ค. · 1 ส.ค.<br>🔁 ทุกปี · 👫 ทั้งสองคน</div>
+      <div class="ai-card" style="width:100%">✨ <b>เฟส 2:</b> AI จะเตรียมไอเดียของขวัญ/แผนเดทให้ก่อนถึงวัน</div>
+      <div class="btn tap" style="margin-top:auto">บันทึกวันสำคัญ</div>`,'center')},
+   {code:'B6',ttl:'บันทึก + ซิงก์ปฏิทิน',d:'cron ตั้ง push',
+    html:ab('เพิ่มแล้ว 🎉','rose')+sc(
+     `<div class="emoji">🗓️</div>
+      <div class="h">ตั้งวันสำคัญเรียบร้อย</div>
+      <div class="box" style="width:100%">📲 เพิ่มลงปฏิทินมือถือด้วย?</div>
+      <div class="row" style="width:100%"><div class="btn ghost tap">ไว้ก่อน</div><div class="btn tap">เพิ่มเลย</div></div>
+      <div class="small">แฟนได้รับการแจ้งแล้ว</div>`,'center')},
+  ],
+  notes:[
+   {range:[0,2],seg:'ประเภท & วันที่',cards:[
+    {ct:'📝 ฟิลด์',li:['ประเภท (พรีเซ็ต/กำหนดเอง)','ชื่อ + วันที่ (date picker)','การเกิดซ้ำ: ทุกปี / ทุกเดือน / ครั้งเดียว','ไอคอน + สีการ์ด']},
+    {ct:'⚙️ Logic',li:['“ครบรอบรายเดือน” → คำนวณรอบถัดไปจากวันเริ่มคบ','เลือกประเภท → เติมไอคอน/ชื่อ default ให้','วันสำคัญเป็นของ couple → เห็น/แก้ได้ทั้งคู่']},
+    {cls:'edge',ct:'⚠️ Edge cases',li:['เลือกวันที่ในอดีต + ครั้งเดียว → เตือน','recurring + อดีต → เด้งไปรอบหน้าให้','29 ก.พ. → ปีไม่อธิกสุรทินใช้ 28','เขตเวลาต่างกัน → ยึด timezone ของ couple']},
+    {ct:'🔌 API / Data',api:'POST /dates\n\n{coupleId, type, title, date,\n recurrence, icon, color}'},
+   ]},
+   {range:[3,5],seg:'ตั้งเตือน & บันทึก',cards:[
+    {ct:'🔔 การเตือน',li:['เลือกได้หลายช่วง (วันนั้น/1/3/7 วันก่อน)','ตั้งเวลาแจ้งเอง','toggle “แจ้งทั้งสองคน”']},
+    {ct:'⚙️ Logic / Cron',li:['บันทึก → สร้าง schedule jobs ตามช่วงเตือน','recurring → ตั้ง job รอบถัดไปอัตโนมัติหลังยิง','ส่งผ่าน FCM ไปทั้ง 2 device']},
+    {cls:'ai-col',ct:'✨ AI (เฟส 2)',li:['ก่อนถึงวัน X วัน → AI สร้างไอเดียของขวัญ/เดทจาก preferences','เด้งเป็นการ์ด “เตรียมเซอร์ไพรส์ไหม?”']},
+    {ct:'🔌 API / Data',api:'PATCH /dates/:id\n+ reminders:[{offsetDays,time}],\n  notifyBoth, calendarSynced\n\n@nestjs/schedule → FCM'},
+   ]},
+  ]},
+
+C:{label:'AI ง้อ',num:'C',accent:'ai',
+  title:'AI ง้อ — สร้างประสบการณ์คืนดี',
+  desc:'ฟีเจอร์เด่น: บอกบริบทให้ AI → AI วิเคราะห์แฟนจากโปรไฟล์ → สร้าง “ประสบการณ์ง้อ” เปิดทีละชั้น ส่งให้อีกฝ่าย → ปิด loop ด้วยการคืนดีจริง',
+  screens:[
+   {code:'C1',ttl:'เลือกให้ AI ช่วย',d:'Premium',
+    html:ab('ง้อ 💔→❤️','rose')+sc(
+     `<div class="emoji">🥺</div>
+      <div class="h">อยากง้อแฟนใช่ไหม?</div>
+      <div class="box" style="width:100%">💬 ง้อเองแบบง่ายๆ</div>
+      <div class="btn ai tap" style="width:100%">✨ ให้ AI ช่วยสร้างประสบการณ์ง้อ</div>
+      <div class="small">AI จะออกแบบ “เซอร์ไพรส์ง้อ” ส่งให้แฟนเปิดทีละชั้น</div>`,'center')},
+   {code:'C2',ttl:'บอกบริบท',d:'เหตุ · ความหนัก · โทน',
+    html:ab('✨ บอก AI หน่อย','ai')+sc(
+     `<div class="sec">เกิดอะไรขึ้น?</div>
+      <div class="chips"><span class="chip on">ลืมวันสำคัญ</span><span class="chip">มาสาย</span><span class="chip">พูดแรงไป</span><span class="chip">งอนไม่บอกเหตุ</span><span class="chip">อื่นๆ</span></div>
+      <div class="sec">หนักแค่ไหน</div>
+      <div class="slider"></div>
+      <div class="small spread"><span>งอนนิดๆ</span><span>โกรธมาก</span></div>
+      <div class="sec">อยากได้โทนไหน</div>
+      <div class="chips"><span class="chip ai">จริงใจ</span><span class="chip ai">ขำๆ</span><span class="chip ai">หวานๆ</span></div>
+      <div class="btn ai tap" style="margin-top:auto">ให้ AI วิเคราะห์ →</div>`)},
+   {code:'C3',ttl:'AI ดึงโปรไฟล์ + วางกลยุทธ์',d:'MBTI · ภาษารัก · ของชอบ',
+    html:ab('✨ AI กำลังคิด…','ai')+sc(
+     `<div class="ai-card"><div class="t">🧠 วิเคราะห์แฟนคุณ <span class="dots"><span></span><span></span><span></span></span></div></div>
+      <div class="ai-card">แฟนคุณ <b>INFJ</b> · ภาษารัก = <b>Quality Time</b><br>เกลียดคำขอโทษลอยๆ ชอบการกระทำ</div>
+      <div class="ai-card">🍜 ของโปรด: <b>ชาบู</b> · คาเฟ่เงียบๆ</div>
+      <div class="tip">→ AI แนะนำ: ง้อด้วย “การกระทำ + แผนใช้เวลาด้วยกัน” มากกว่าคำพูด</div>
+      <div class="btn ai tap" style="margin-top:auto">ดูรูปแบบที่ AI แนะนำ →</div>`)},
+   {code:'C4',ttl:'เลือก template',d:'AI จัดอันดับให้',
+    html:ab('✨ เลือกรูปแบบ','ai')+sc(
+     `<div class="sec">AI แนะนำสำหรับแฟนคุณ</div>
+      <div class="box sel">🗺️ เส้นทางความทรงจำ → จบที่คำขอโทษ</div>
+      <div class="box tap">💌 จดหมายเปิดทีละชั้น</div>
+      <div class="box tap">💗 ปลดล็อกหัวใจ (แตะเพื่อเผย)</div>
+      <div class="box tap">🎟️ คูปองง้อ (แลกได้จริง)</div>
+      <div class="box tap">🍽️ คำเชิญลับ → ร้านชาบูที่ชอบ</div>`)},
+   {code:'C5',ttl:'พรีวิว + แก้ทุกชั้น',d:'เพิ่มเสียง/รูป',
+    html:ab('✨ พรีวิว & แก้ไข','ai')+sc(
+     `<div class="small">ประสบการณ์ที่แฟนจะเห็น (3 ชั้น)</div>
+      <div class="box">ชั้น 1 · 📷 รูปวันแรกเจอ<br><span class="small">“จำวันนี้ได้ไหม…”</span> <span style="color:var(--ai)">✎</span></div>
+      <div class="box">ชั้น 2 · 💬 ข้อความขอโทษ (AI ร่าง)<br><span class="small">“เราผิดเองที่ลืม…”</span> <span style="color:var(--ai)">✎</span></div>
+      <div class="box sel">ชั้น 3 · 🍽️ คำเชิญไปชาบู + ปุ่มยกโทษ</div>
+      <div class="row"><div class="box" style="text-align:center">🎙️ เสียง</div><div class="box" style="text-align:center">🖼️ รูป</div></div>
+      <div class="btn ai tap" style="margin-top:auto">แนบของจริง →</div>`)},
+   {code:'C6–7',ttl:'แนบ action + ตั้งเวลาส่ง',d:'จองร้าน / คูปอง',
+    html:ab('✨ แนบของจริง + ส่ง','ai')+sc(
+     `<div class="sec">การกระทำจริง (optional)</div>
+      <div class="coupon" style="border-color:var(--ai);color:var(--ai-d)">🍽️ จองโต๊ะร้านชาบู ส. นี้ 19:00</div>
+      <div class="box">🎟️ แถมคูปอง: “ทำกับข้าวให้ 1 มื้อ”</div>
+      <div class="sec">ส่งเมื่อไหร่</div>
+      <div class="chips"><span class="chip on">ส่งเลย</span><span class="chip">ตั้งเวลา</span></div>
+      <div class="btn ai tap" style="margin-top:auto">ส่งให้แฟน 💌</div>`)},
+   {code:'C8',ttl:'Push teaser (ฝั่งคนรับ)',d:'เร้าความสงสัย',
+    html:ab('🔔 การแจ้งเตือน')+sc(
+     `<div class="box" style="width:100%;text-align:left"><b>OurSpace</b> · เมื่อกี้<br>💌 มีบางอย่างจากแฟน… อยากให้เปิดดูนะ</div>
+      <div class="small">(teaser — ไม่สปอยล์เนื้อหา)</div>
+      <div class="btn tap" style="width:100%">แตะเพื่อเปิด</div>`,'center')},
+   {code:'C9',ttl:'เปิดเต็มจอ ชั้นที่ 1',d:'animation เปิดซอง',
+    html:ab('','bare')+sc(
+     `<div class="exp">
+        <span class="star" style="top:14px;left:20px">✦</span>
+        <span class="star" style="top:30px;right:24px;animation-delay:.5s">✦</span>
+        <span class="star" style="bottom:30px;left:30px;animation-delay:1s">✦</span>
+        <div class="envelope">💌</div>
+        <div class="ex-txt">แฟนมีอะไรอยากบอก…</div>
+        <div class="coupon tap" style="background:rgba(255,255,255,.92)">แตะเพื่อเปิดซอง</div>
+      </div>`,'pad0')},
+   {code:'C10',ttl:'ไล่แตะทีละชั้น',d:'รูป → ข้อความ → คำเชิญ',
+    html:ab('','bare')+sc(
+     `<div class="exp">
+        <div class="small" style="opacity:.7">ชั้น 2 / 3</div>
+        <div class="layerstack">
+          <div class="lyr">📷 รูปวันแรกเจอ</div>
+          <div class="lyr">💬 “เราผิดเองที่ลืม…”</div>
+          <div class="lyr">🍽️ คำเชิญ + ปุ่มยกโทษ</div>
+        </div>
+        <div class="coupon tap" style="background:rgba(255,255,255,.9)">แตะค้างเพื่อคลี่ชั้นถัดไป →</div>
+      </div>`,'pad0')},
+   {code:'C11',ttl:'ชั้นสุดท้าย',d:'คำขอโทษ + คำเชิญ + ปุ่ม',
+    html:ab('','bare')+sc(
+     `<div class="exp">
+        <div class="emoji">🌹</div>
+        <div class="ex-txt">“ขอโทษนะ ส.นี้ไปกินชาบูที่เธอชอบกัน?”</div>
+        <div class="coupon" style="background:rgba(255,255,255,.92)">🍽️ จองโต๊ะไว้แล้ว · ส. 19:00</div>
+        <button class="btn ok tap">ยกโทษให้ 💕</button>
+        <div class="small" style="opacity:.85">ขอเวลาคิดแป๊บ…</div>
+      </div>`,'pad0')},
+   {code:'C12',ttl:'คืนดี + ปิด loop',d:'ล้างสถานะ · ผูกเดท',
+    html:ab('คืนดีแล้ว 🎉','rose')+sc(
+     `<div class="emoji">❤️</div>
+      <div class="h">งอนหายแล้ว!</div>
+      <div class="small">ทั้งคู่เห็นหน้านี้พร้อมกัน<br>สถานะ “งอน” ถูกล้าง</div>
+      <div class="box" style="width:100%">📔 บันทึกช่วงเวลานี้ลงไดอารี่?</div>
+      <div class="box" style="width:100%">🍽️ เดทชาบู ส. นี้ ถูกเพิ่มในวันสำคัญ</div>
+      <div class="btn line tap" style="width:100%">เริ่มดูใหม่ ↺</div>`,'center')},
+  ],
+  notes:[
+   {range:[0,2],seg:'ฝั่งคนส่ง — เก็บบริบท & วิเคราะห์',cards:[
+    {ct:'📥 Input ที่เก็บ',li:['สาเหตุ (chips + พิมพ์เพิ่ม)','ระดับความหนัก (slider 1–5)','โทนที่อยากได้ (จริงใจ/ขำ/หวาน)']},
+    {cls:'ai-col',ct:'🧠 AI ทำอะไร',li:['ดึง <b>partner profile</b>: MBTI, ภาษารัก, ของชอบ/เกลียด, อาหารโปรด','+ บริบทล่าสุด (mood, แชทช่วงทะเลาะ — ถ้าอนุญาต)','เลือก “แนวทางง้อ” + เสนอ template ที่เหมาะ']},
+    {cls:'edge',ct:'⚠️ ความเป็นส่วนตัว',li:['ขอ consent ก่อนให้ AI อ่านแชท','ไม่ส่งข้อมูลดิบของแฟนกลับมาโชว์เกินจำเป็น','rate-limit ต่อวัน (กัน cost บาน)']},
+    {ct:'🔌 API / Data',api:'POST /soo/ai/analyze\n{reason, severity, tone}\n→ {insight, suggestedTemplates[]}\n\nlog → aiLogs(model,tokens,cost)'},
+   ]},
+   {range:[3,5],seg:'ฝั่งคนส่ง — สร้าง UI Pattern ที่จะส่งไป',cards:[
+    {cls:'ai-col',ct:'🎨 AI สร้างอะไร',li:['เลือก template ตามบุคลิกแฟน แล้ว <b>generate เนื้อหาแต่ละชั้น</b> (ข้อความ/ลำดับรูป/คำเชิญ)','ผลลัพธ์ = โครง “ประสบการณ์ interactive” (layers[]) ที่ render เป็น UI ฝั่งคนรับ']},
+    {ct:'✏️ คนส่งคุมได้',li:['แก้ข้อความทุกชั้น / สลับลำดับ','เพิ่มเสียง/รูป/GIF ของตัวเอง','แนบ action จริง: จองร้าน, คูปองง้อ, ผูกเดทกับวันสำคัญ','ส่งทันที หรือตั้งเวลา']},
+    {cls:'edge',ct:'⚠️ Edge cases',li:['AI ร่างไม่ถูกใจ → ปุ่ม “สร้างใหม่” (regenerate)','เนื้อหาไม่เหมาะสม → safety filter','ส่งซ้ำรัวๆ → กันสแปม/cooldown']},
+    {ct:'🔌 API / Data',api:'POST /soo/ai/draft → {layers[]}\nPATCH /soo/:id (แก้ layers)\nPOST /soo/:id/send {scheduledAt}\n\nsooExperience:{template,\n layers[{type,content,media}],\n attachedAction, status}'},
+   ]},
+   {range:[6,8],seg:'ฝั่งคนรับ — เปิดประสบการณ์ทีละชั้น',cards:[
+    {ct:'📲 ประสบการณ์',li:['Push เป็น <b>teaser</b> ไม่สปอยล์','เปิด = ฉากเต็มจอ บรรยากาศพิเศษ (ดาว/อนิเมชัน)','แต่ละชั้นคลี่ทีละขั้น (tap/แตะค้าง/ปัด)']},
+    {cls:'ai-col',ct:'🧩 Render จาก layers[]',li:['client อ่าน <b>layers[]</b> ที่ AI+คนส่งสร้าง แล้ว render เป็นซีเควนซ์','รองรับ type: photo / text / voice / memory / coupon / invite']},
+    {cls:'edge',ct:'⚠️ Edge cases',li:['คนรับไม่ใช่ Premium → <b>เปิดรับได้ฟรี</b> (จ่ายเฉพาะคนสร้าง)','เน็ตช้า → preload media ก่อนเริ่ม','เปิดค้างกลางทาง → กลับมาเปิดต่อได้']},
+    {ct:'🔌 API / Data',api:'GET /soo/:id  (mark opened)\n→ {template, layers[], action}\n\nstatus: sent → opened'},
+   ]},
+   {range:[9,11],seg:'ปิด loop & ทางแยก',cards:[
+    {ct:'🤝 “ยกโทษให้”',li:['ทั้งคู่ได้ฉากฉลอง “คืนดี” พร้อมกัน (realtime)','ล้างสถานะงอน + ปิด soo event','action ที่แนบทำงาน (ยืนยันจองร้าน ฯลฯ)']},
+    {cls:'edge',ct:'🕊️ “ขอเวลาคิด”',li:['ไม่บังคับยกโทษทันที — สถานะ = pending','คนส่งเห็นว่า “เปิดอ่านแล้ว แต่ยังไม่พร้อม”','ส่ง gentle nudge ทีหลัง (ไม่ตื๊อ)']},
+    {cls:'ai-col',ct:'📈 เก็บ data',li:['template ไหน “เวิร์ก” (ถูกยกโทษ) → ปรับการแนะนำครั้งหน้า','log ลง aiLogs + soo outcome']},
+    {ct:'🔌 API / Data',api:'POST /soo/:id/forgive\nPOST /soo/:id/defer\n→ ws soo:resolved (ทั้งคู่)\n\nstatus: opened →\n forgiven | pending'},
+   ]},
+  ]},
+};
+
+/* ---------- ENGINE ---------- */
+const state={flow:'A',idx:0};
+const $=id=>document.getElementById(id);
+const screenEl=$('screen'),capEl=$('cap'),dotsNav=$('dotsNav'),
+      progEl=$('progress'),notesWrap=$('notesWrap'),
+      headEl=$('flowHead'),khNum=$('khNum'),khKicker=$('khKicker'),
+      khTitle=$('khTitle'),khDesc=$('khDesc'),deviceEl=$('device');
+
+function noteForIdx(flow,idx){
+  return flow.notes.find(n=>idx>=n.range[0]&&idx<=n.range[1])||flow.notes[0];
+}
+function renderNotes(flow,idx){
+  const n=noteForIdx(flow,idx);
+  const cards=n.cards.map(c=>{
+    const body=c.api
+      ? `<div class="api">${c.api}</div>`
+      : `<ul>${c.li.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+    return `<div class="ncard ${c.cls||''}"><div class="ct">${c.ct}</div>${body}</div>`;
+  }).join('');
+  notesWrap.innerHTML=`<div class="notes-seg">${n.seg}</div><div class="ncards">${cards}</div>`;
+}
+function renderDots(flow){
+  dotsNav.innerHTML=flow.screens.map((s,i)=>
+    `<button class="dot ${i===state.idx?'on':''}" data-i="${i}" aria-label="สเต็ป ${i+1}"></button>`).join('');
+}
+function render(){
+  const flow=FLOWS[state.flow];
+  const s=flow.screens[state.idx];
+  // header
+  const ai=flow.accent==='ai';
+  headEl.className='flow-head'+(ai?' ai':'');
+  khNum.textContent=flow.num; khKicker.textContent='FLOW '+flow.num;
+  khTitle.textContent=flow.title; khDesc.textContent=flow.desc;
+  document.querySelector('.stage').classList.toggle('ai',ai);
+  // screen
+  screenEl.innerHTML=s.html;
+  screenEl.classList.remove('screen-enter');void screenEl.offsetWidth;
+  screenEl.classList.add('screen-enter');
+  // caption
+  capEl.innerHTML=`<div class="code">${s.code}</div><div class="ttl">${s.ttl}</div><div class="d">${s.d}</div>`;
+  // dots + progress
+  renderDots(flow);
+  progEl.textContent=`${state.idx+1} / ${flow.screens.length}`;
+  $('prev').disabled=state.idx===0;
+  $('next').disabled=state.idx===flow.screens.length-1;
+  // notes
+  renderNotes(flow,state.idx);
+  // tap hotspots advance
+  screenEl.querySelectorAll('.tap').forEach(el=>{
+    el.setAttribute('tabindex','0');el.setAttribute('role','button');
+    el.addEventListener('click',advance);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();advance();}});
+  });
+}
+function advance(){
+  const flow=FLOWS[state.flow];
+  if(state.idx<flow.screens.length-1){state.idx++;render();}
+  else{state.idx=0;render();} // loop on final CTA
+}
+function go(i){const flow=FLOWS[state.flow];state.idx=Math.max(0,Math.min(i,flow.screens.length-1));render();}
+function switchFlow(f){
+  state.flow=f;state.idx=0;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.flow===f));
+  render();
+}
+
+/* events */
+$('next').addEventListener('click',()=>go(state.idx+1));
+$('prev').addEventListener('click',()=>go(state.idx-1));
+dotsNav.addEventListener('click',e=>{const d=e.target.closest('.dot');if(d)go(+d.dataset.i);});
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchFlow(t.dataset.flow)));
+document.querySelectorAll('a[href^="#flow-"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const f=a.getAttribute('href').split('-')[1];
+    if(FLOWS[f]){switchFlow(f);}
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight')go(state.idx+1);
+  if(e.key==='ArrowLeft')go(state.idx-1);
+});
+
+render();
+</script>
+</body>
+</html>
