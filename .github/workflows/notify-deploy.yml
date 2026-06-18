@@ -1,0 +1,35 @@
+name: Notify on deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send deploy notification email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🚀 Our Space deployed — ${{ github.event.head_commit.message }}"
+          from: Our Space Deploy <${{ secrets.MAIL_USERNAME }}>
+          to: krissadeeka.patc@gmail.com, benjamapon.f@gmail.com
+          body: |
+            Our Space ถูก deploy ใหม่แล้ว ✅
+
+            📝 Commit : ${{ github.event.head_commit.message }}
+            👤 By     : ${{ github.actor }}
+            🔗 SHA    : ${{ github.sha }}
+            🕒 Time   : ${{ github.event.head_commit.timestamp }}
+
+            เปิดดู (live):
+            • Hub   : https://krissadeekapatc.github.io/ourspace/
+            • Play  : https://krissadeekapatc.github.io/ourspace/play/
+            • Flows : https://krissadeekapatc.github.io/ourspace/flows/
+
+            — ส่งอัตโนมัติจาก GitHub Actions ทุกครั้งที่ deploy
