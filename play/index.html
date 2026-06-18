@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <title>OurSpace — Playable Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,20 +20,15 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%;font-family:var(--sans);color:var(--ink);
-    background:radial-gradient(120% 90% at 50% 0%,#f7e3ee,#e7e0ee);
-    -webkit-font-smoothing:antialiased;overflow:hidden}
-  body{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:14px}
+    background:#fdfbff;-webkit-font-smoothing:antialiased;overflow:hidden}
+  body{height:100dvh;overflow:hidden}
 
-  /* ===== device ===== */
-  .device{width:390px;max-width:100vw;height:min(844px,calc(100dvh - 86px));
-    background:linear-gradient(165deg,#3a3340,#1b181f);border-radius:48px;padding:11px;
-    box-shadow:0 40px 90px -30px rgba(60,25,70,.6),0 0 0 1px rgba(0,0,0,.05);position:relative;flex:0 0 auto}
-  .scrn{position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;background:#fdfbff;
-    display:flex;flex-direction:column}
-  .island{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:96px;height:26px;
-    background:#0a0810;border-radius:999px;z-index:60}
-  .status{height:40px;flex:0 0 auto;display:flex;align-items:flex-end;justify-content:space-between;
-    padding:0 22px 5px;font-size:12px;font-weight:700;color:var(--ink);z-index:5}
+  /* ===== device — mobile-first: fills the screen, locks safe area ===== */
+  .device{position:relative;width:100vw;height:100dvh;background:#fdfbff;overflow:hidden}
+  .scrn{position:relative;width:100%;height:100%;overflow:hidden;background:#fdfbff;display:flex;flex-direction:column}
+  .island{display:none}
+  .status{flex:0 0 auto;display:flex;align-items:flex-end;justify-content:space-between;
+    padding:calc(8px + env(safe-area-inset-top)) 22px 5px;font-size:12px;font-weight:700;color:var(--ink);z-index:5}
   .status .rgt{display:flex;gap:5px;align-items:center;font-size:11px}
 
   /* screen viewport */
@@ -135,7 +130,7 @@
   .bn{flex:0 0 auto;display:none;border-top:1px solid var(--line);background:rgba(255,255,255,.97);
     backdrop-filter:blur(8px);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
   .device.tab .bn{display:flex}
-  .bn a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;padding:4px 0}
+  .bn a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;padding:4px 0}
   .bn a .ic{font-size:21px;filter:grayscale(.4) opacity(.7)}
   .bn a.on{color:var(--rose)}
   .bn a.on .ic{filter:none}
@@ -147,7 +142,7 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   /* push banner */
-  .pushwrap{position:absolute;top:46px;left:0;right:0;z-index:55;display:flex;flex-direction:column;gap:8px;padding:0 12px;pointer-events:none}
+  .pushwrap{position:absolute;top:calc(42px + env(safe-area-inset-top));left:0;right:0;z-index:55;display:flex;flex-direction:column;gap:8px;padding:0 12px;pointer-events:none}
   .push{background:rgba(255,255,255,.98);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;gap:11px;
     box-shadow:0 16px 34px -14px rgba(40,20,50,.4);pointer-events:auto;cursor:pointer;
     animation:drop .4s cubic-bezier(.2,.8,.2,1);text-align:left}
@@ -189,14 +184,26 @@
   .hintmode .fab,.hintmode .box.sel[data-nav]{animation:pulse 1.6s infinite}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,131,.0)}50%{box-shadow:0 0 0 5px rgba(255,77,131,.35)}}
 
-  @media (max-width:430px){
-    body{padding:0;gap:0;justify-content:flex-start}
-    .device{width:100vw;height:100dvh;border-radius:0;padding:0;box-shadow:none}
-    .scrn{border-radius:0}
-    .island{display:none}
-    .status{height:30px;padding-top:6px}
-    .toolbar{position:fixed;bottom:10px;left:0;right:0;z-index:210}
-    .credit{display:none}
+  /* demo button (mobile) — fixed to viewport edge so it's always visible */
+  .demofab{position:fixed;right:8px;top:50%;transform:translateY(-50%);
+    width:42px;height:42px;border-radius:50%;background:#2b2438;color:#fff;border:0;
+    display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;z-index:300;
+    box-shadow:0 8px 22px -6px rgba(0,0,0,.5);opacity:.92}
+
+  /* default (phone): hide desktop toolbar/credit, show FAB */
+  .toolbar,.credit{display:none}
+
+  /* desktop / tablet: pretty framed device + visible toolbar below */
+  @media (min-width:520px){
+    html,body{background:radial-gradient(120% 90% at 50% 0%,#f7e3ee,#e7e0ee)}
+    body{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:14px;overflow:hidden}
+    .device{width:390px;height:min(844px,calc(100dvh - 96px));border-radius:48px;padding:11px;
+      background:linear-gradient(165deg,#3a3340,#1b181f);box-shadow:0 40px 90px -30px rgba(60,25,70,.6),0 0 0 1px rgba(0,0,0,.05)}
+    .scrn{border-radius:38px}
+    .island{display:block;position:absolute;top:14px;left:50%;transform:translateX(-50%);width:96px;height:26px;background:#0a0810;border-radius:999px;z-index:60}
+    .demofab{display:none}
+    .toolbar{display:flex}
+    .credit{display:block}
   }
 </style>
 </head>
@@ -210,6 +217,7 @@
     <div class="view"><div class="screen" id="screen"></div></div>
     <nav class="bn" id="bn"></nav>
     <div class="toast" id="toast"></div>
+    <button class="demofab" data-tool="menu" aria-label="เครื่องมือ demo">🛠</button>
   </div>
 </div>
 
@@ -678,10 +686,20 @@ function simulate(type){
 
 /* ============ TOOLBAR / SHEETS ============ */
 function tool(t){
-  if(t==='restart'){ S=DEFAULT(); stack=['splash']; render(); toast('เริ่มใหม่แล้ว ⟲'); }
-  else if(t==='hints'){ document.body.classList.toggle('hintmode'); document.querySelector('[data-tool="hints"]').classList.toggle('on'); }
+  if(t==='menu'){ openSheet(demoSheet()); }
+  else if(t==='restart'){ closeSheet(); S=DEFAULT(); stack=['splash']; render(); toast('เริ่มใหม่แล้ว ⟲'); }
+  else if(t==='hints'){ closeSheet(); const on=document.body.classList.toggle('hintmode'); document.querySelectorAll('[data-tool="hints"]').forEach(b=>b.classList.toggle('on',on)); }
   else if(t==='simulate'){ openSheet(simSheet()); }
   else if(t==='jump'){ openSheet(jumpSheet()); }
+}
+function demoSheet(){
+  return `<div class="grab"></div><h3>เครื่องมือ demo</h3><div class="sd">สำหรับเล่น / พรีเซนต์</div>
+    <div class="jumpgrid">
+      <button data-tool="simulate">🔔 จำลองเหตุการณ์</button>
+      <button data-tool="jump">☰ ไปหน้า</button>
+      <button data-tool="restart">⟲ Restart</button>
+      <button data-tool="hints">👆 Tap hints</button>
+    </div>`;
 }
 function simSheet(){
   const rows=[
