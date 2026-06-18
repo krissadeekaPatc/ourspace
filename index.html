@@ -24,7 +24,8 @@
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);
-    font-size:16px;line-height:1.72;-webkit-font-smoothing:antialiased}
+    font-size:16px;line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img,iframe,table,pre{max-width:100%}
   ::selection{background:var(--rose-l)}
 
   /* ===== top nav ===== */
@@ -137,6 +138,7 @@
   .frame{justify-self:center;width:300px;height:620px;border-radius:42px;background:linear-gradient(160deg,#3a3340,#1b181f);
     padding:11px;box-shadow:var(--shadow)}
   .frame iframe{width:100%;height:100%;border:0;border-radius:32px;background:#fff;display:block}
+  .mobile-play{display:none}
   .design-info h2{margin-top:0}
   .dbtns{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0}
   .dbtn{text-decoration:none;font-weight:800;font-size:15px;padding:14px 22px;border-radius:14px;transition:.2s}
@@ -155,10 +157,15 @@
   @media (max-width:780px){
     .twocol,.roadmap{grid-template-columns:1fr}
     .design-stage{grid-template-columns:1fr}
-    .frame{width:280px;height:580px}
+    .frame{display:none}
+    .mobile-play{display:block;text-decoration:none;color:var(--ink);text-align:center;
+      background:linear-gradient(135deg,#fff0f5,#f1ecff);border:1px solid var(--rose-bd);
+      border-radius:22px;padding:30px 22px;box-shadow:var(--shadow-sm)}
     .feat .fbadges{margin-left:0}
-    .navtabs button{padding:9px 16px}
+    .navtabs button{padding:9px 14px}
     .playbtn{display:none}
+    table{font-size:13.5px}
+    th,td{padding:9px 10px}
   }
 </style>
 </head>
@@ -303,22 +310,30 @@
       </div>
 
       <div class="feat">
-        <div class="fhd"><div class="fno">6</div><div><div class="ft">Trip Plan</div><div class="fsub">แพลนเที่ยวสำหรับเราสองคน</div></div>
+        <div class="fhd"><div class="fno">6</div><div><div class="ft">Trip Plan — วางแผนเที่ยวสำหรับเราสองคน</div><div class="fsub">ได้แรงบันดาลใจจาก Wanderlog แต่ผูกกับ “ความทรงจำคู่”</div></div>
           <div class="fbadges"><span class="pill p-p2">Phase 2</span></div></div>
         <ul>
-          <li>วางแผนทริปแบบ <span class="hl">Wanderlog</span>: รายวัน · สถานที่ · เวลา · โน้ต · แผนที่</li>
-          <li>วางแผนร่วมกันได้ทั้งคู่ · ผูกกับ Pin Location & Google Maps</li>
+          <li><b>สร้างทริป</b>: ชื่อทริป · ช่วงวันที่ · ปลายทาง · รูปปก</li>
+          <li><b>Itinerary รายวัน</b>: เพิ่มสถานที่/กิจกรรมในแต่ละวัน · ลากจัดลำดับ · ใส่เวลา/โน้ต · เห็นระยะเดินทางระหว่างจุด</li>
+          <li><b>แผนที่รวม (Google Maps)</b>: ทุกจุดถูกปักอัตโนมัติ · เห็นเส้นทางรายวัน · จัดให้จุดที่ใกล้กันอยู่ด้วยกัน</li>
+          <li><b>Wishlist “อยากไป”</b>: เก็บที่อยากไปไว้ก่อน แล้วลากเข้าวันในแผน</li>
+          <li><b>วางแผนร่วมกัน 2 คน</b> แบบ realtime (เป็น couple อยู่แล้ว — sync ทันที)</li>
+          <li><b>Checklist เตรียมตัว</b> (ของที่ต้องเอาไป/จองแล้วหรือยัง)</li>
+          <li><b>นำเข้าตั๋ว/โรงแรม</b>: forward อีเมลยืนยัน หรือเชื่อม Gmail → เพิ่มเข้าแผนอัตโนมัติ <span class="pill p-p2">เฟสหลัง</span></li>
         </ul>
-        <div class="note">⚠️ Trip Plan แบบ Wanderlog เป็นฟีเจอร์ใหญ่ → เริ่มจาก itinerary minimal ก่อน แล้วค่อยเติม</div>
+        <div class="callout">💞 <b>จุดต่างจาก Wanderlog:</b> ทริปของเราผูกกับ <b>Pin Location</b> & <b>วันสำคัญ</b> — พอจบทริป ระบบช่วยแปลงเป็น <b>ความทรงจำ/ไดอารี่</b> และปักหมุดที่ไปจริงให้อัตโนมัติ (วนกลับมาเป็น Sweet Notification ในอนาคต)</div>
+        <div class="note">⚠️ เป็นฟีเจอร์ใหญ่ → MVP ของ Trip Plan เริ่มจาก itinerary รายวัน + แผนที่ + wishlist ก่อน · import อีเมล/ไกด์สาธารณะค่อยตามมา</div>
       </div>
 
-      <div class="feat">
-        <div class="fhd"><div class="fno">7</div><div><div class="ft">Trip’s Expense Tracking</div><div class="fsub">บันทึกค่าใช้จ่าย + AI สรุป + แบ่งบิล</div></div>
+      <div class="feat f-ai">
+        <div class="fhd"><div class="fno">7</div><div><div class="ft">Trip’s Expense Tracking</div><div class="fsub">บันทึกค่าใช้จ่าย · แบ่งบิล · AI สรุปทริป (เชื่อมกับ Trip Plan)</div></div>
           <div class="fbadges"><span class="pill p-p2">Phase 2</span><span class="pill p-prem">Premium (AI)</span></div></div>
         <ul>
-          <li>บันทึกค่าใช้จ่ายระหว่างทริป</li>
-          <li><b>AI ช่วยสรุป</b>ค่าใช้จ่ายของทริป</li>
-          <li><b>Custom portion</b>: กำหนดให้แฟนออกกี่ % หรือกี่บาท</li>
+          <li><b>บันทึกค่าใช้จ่าย</b>ต่อทริป/ต่อวัน · หมวด (อาหาร/ที่พัก/เดินทาง) · ใครเป็นคนจ่าย</li>
+          <li><b>แบ่งบิล (custom portion)</b>: 50/50 · กำหนด % · หรือระบุจำนวนเงินที่แฟนออก</li>
+          <li><b>สรุป “ใครติดใครเท่าไหร่”</b> + กดเคลียร์ยอดเมื่อจ่ายคืนแล้ว</li>
+          <li><b>ตั้งงบทริป</b> + เตือนเมื่อใกล้เกินงบ</li>
+          <li><b>AI สรุปทริป</b>: รวมยอด + ไฮไลต์การใช้จ่าย → ต่อยอดเป็น “ไดอารี่ทริป” อัตโนมัติได้</li>
         </ul>
       </div>
 
@@ -392,7 +407,7 @@
         <tr><td><b>Infra</b></td><td>FCM (push) · OTP (SMS) · Object storage (รูป) · Web admin (analytics)</td></tr>
       </table>
       <h3 class="sub">Data model (high-level)</h3>
-      <p class="muted" style="font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px;line-height:1.9;color:var(--ink-soft)">
+      <p class="muted" style="font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px;line-height:1.9;color:var(--ink-soft);overflow-x:auto;word-break:break-word">
         couple · user(nickname, status, birthday) · place · specialDate · journal(gratitude|learning)<br>
         trip · tripExpense(split) · sooExperience(template, layers, prompt) · aboutNote(encrypted)<br>
         milestone(reason, location) · geofence · distanceState · aiLogs
@@ -479,8 +494,15 @@
       <div class="dhero">
         <p class="kicker">Interactive</p>
         <h2 class="sec">Design & Prototype</h2>
-        <p class="lead" style="max-width:620px;margin:6px auto 0">กดเล่นได้จริงในกรอบด้านล่าง — หรือเปิดเต็มจอ/ดู flow ละเอียดทีละสเต็ป</p>
+        <p class="lead" style="max-width:620px;margin:6px auto 0">กดเล่นได้จริง — เปิดเต็มจอเหมือนแอปจริง หรือดู flow ละเอียดทีละสเต็ป</p>
       </div>
+
+      <a class="mobile-play" href="./play/">
+        <div style="font-size:42px">🎮</div>
+        <div style="font-weight:800;font-size:19px;margin-top:8px">เปิดเล่น Prototype เต็มจอ</div>
+        <div class="muted" style="font-size:14px;margin-top:6px;line-height:1.6">กดเล่นได้จริงเหมือนแอป — Splash → Onboarding → Home · แชท · AI ง้อ</div>
+        <div style="margin-top:14px;display:inline-block;background:var(--rose);color:#fff;font-weight:800;padding:12px 24px;border-radius:999px">เปิดเลย →</div>
+      </a>
 
       <div class="design-stage">
         <div class="frame"><iframe src="./play/index.html" title="OurSpace playable prototype" loading="lazy"></iframe></div>
