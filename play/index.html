@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="color-scheme" content="light">
+<title>OurSpace — Playable Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2b2438; --ink-soft:#473e54; --muted:#8a8398; --line:#ece9f1;
+    --bg:#efe9f3; --surface:#ffffff; --soft:#f6f4fa;
+    --rose:#ff4d83; --rose-d:#d8336a; --rose-l:#fff1f6; --rose-bd:#ffd0e0;
+    --ai:#7c5cff; --ai-d:#5b3be0; --ai-l:#f1ecff; --ai-bd:#ddd1ff;
+    --ok:#11a06a; --warn:#d98300;
+    --serif:"Noto Serif Thai",Georgia,serif;
+    --sans:"Noto Sans Thai",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;font-family:var(--sans);color:var(--ink);
+    background:radial-gradient(120% 90% at 50% 0%,#f7e3ee,#e7e0ee);
+    -webkit-font-smoothing:antialiased;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:14px}
+
+  /* ===== device ===== */
+  .device{width:390px;max-width:100vw;height:min(844px,calc(100dvh - 86px));
+    background:linear-gradient(165deg,#3a3340,#1b181f);border-radius:48px;padding:11px;
+    box-shadow:0 40px 90px -30px rgba(60,25,70,.6),0 0 0 1px rgba(0,0,0,.05);position:relative;flex:0 0 auto}
+  .scrn{position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;background:#fdfbff;
+    display:flex;flex-direction:column}
+  .island{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:96px;height:26px;
+    background:#0a0810;border-radius:999px;z-index:60}
+  .status{height:40px;flex:0 0 auto;display:flex;align-items:flex-end;justify-content:space-between;
+    padding:0 22px 5px;font-size:12px;font-weight:700;color:var(--ink);z-index:5}
+  .status .rgt{display:flex;gap:5px;align-items:center;font-size:11px}
+
+  /* screen viewport */
+  .view{flex:1;position:relative;overflow:hidden}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow-y:auto;background:#fdfbff}
+  .screen::-webkit-scrollbar{width:0}
+  .screen.anim{animation:slideIn .34s cubic-bezier(.2,.7,.2,1)}
+  .screen.back{animation:slideBack .34s cubic-bezier(.2,.7,.2,1)}
+  @keyframes slideIn{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+  @keyframes slideBack{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+
+  /* app bar */
+  .ab{flex:0 0 auto;min-height:50px;display:flex;align-items:center;gap:10px;padding:8px 16px 10px;
+    font-size:16px;font-weight:800;background:#fff;border-bottom:1px solid var(--line);z-index:4}
+  .ab .bk{font-size:22px;cursor:pointer;color:var(--ink);margin-left:-4px;width:26px}
+  .ab .r{margin-left:auto;font-weight:600;font-size:13px;color:var(--muted)}
+  .ab.rose{background:linear-gradient(135deg,#ff7aa6,#ff4d83);color:#fff;border:0}
+  .ab.rose .bk,.ab.rose .r{color:#fff}
+  .ab.ai{background:linear-gradient(135deg,#9170ff,#6d3bff);color:#fff;border:0}
+  .ab.ai .bk{color:#fff}
+
+  .body{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .body.center{align-items:center;text-align:center;justify-content:center;gap:14px}
+
+  /* ui kit */
+  .sec{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+  .h{font-family:var(--serif);font-weight:700;font-size:20px;line-height:1.25}
+  .h2{font-weight:800;font-size:16px}
+  .sub{font-size:13px;color:var(--muted);line-height:1.55}
+  .emoji{font-size:48px;line-height:1}
+  .big{font-family:var(--serif);font-weight:700;font-size:30px;color:var(--rose);line-height:1}
+  .box{background:var(--soft);border:1px solid var(--line);border-radius:15px;padding:13px 14px;
+    font-size:13.5px;color:var(--ink-soft);line-height:1.45}
+  .box.sel{border-color:var(--rose);background:var(--rose-l);color:var(--rose-d);font-weight:700;box-shadow:0 0 0 3px rgba(255,77,131,.1)}
+  .box .ttl{font-weight:800;color:var(--ink);font-size:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 6px 20px -12px rgba(60,25,70,.25)}
+  .fld{background:#fff;border:1px solid var(--line);border-radius:13px;padding:9px 13px}
+  .fld .l{font-size:11px;color:var(--muted);font-weight:700}
+  .fld .v{font-size:15px;color:var(--ink);margin-top:1px;font-weight:600}
+  .fld input{border:0;outline:0;font-family:var(--sans);font-size:15px;font-weight:600;color:var(--ink);width:100%;background:transparent;margin-top:1px;padding:0}
+  .row{display:flex;gap:9px}.row>*{flex:1}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .btn{background:var(--rose);color:#fff;border:0;border-radius:14px;padding:14px;text-align:center;
+    font-size:14px;font-weight:800;font-family:var(--sans);cursor:pointer;transition:.15s;width:100%;display:block}
+  .btn:active{transform:scale(.98)}
+  .btn.line{background:#fff;border:1.6px solid var(--rose);color:var(--rose)}
+  .btn.ai{background:linear-gradient(135deg,#9170ff,#6d3bff)}
+  .btn.ok{background:var(--ok)}
+  .btn.ghost{background:#efecf4;color:var(--ink-soft)}
+  .btn.sm{padding:10px;font-size:12.5px;border-radius:11px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12.5px;color:var(--ink-soft);cursor:pointer;transition:.15s}
+  .chip.on{background:var(--rose);color:#fff;border-color:var(--rose);font-weight:700}
+  .chip.ai{background:var(--ai-l);border-color:var(--ai-bd);color:var(--ai-d);font-weight:700}
+  .chip.ai.on{background:var(--ai);color:#fff}
+  .slider{height:8px;background:linear-gradient(90deg,#ffd1df,var(--rose));border-radius:9px;position:relative;margin:8px 3px}
+  .slider::after{content:"";position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;background:#fff;border:3px solid var(--rose);border-radius:50%;box-shadow:0 3px 8px rgba(255,77,131,.4)}
+  .spread{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+  .spacer{flex:1}
+  .center-col{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+  .av{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#ffd9e8,#e7d9ff);display:flex;align-items:center;justify-content:center;font-size:28px;flex:0 0 auto}
+  .pho{background:linear-gradient(135deg,#ffe0ec,#ece0ff);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#c98}
+
+  /* map */
+  .map{flex:1;min-height:200px;border-radius:16px;position:relative;overflow:hidden;
+    background:linear-gradient(0deg,#e3ede5 1px,transparent 1px) 0 0/100% 32px,
+      linear-gradient(90deg,#e3ede5 1px,transparent 1px) 0 0/32px 100%,#eef6ef}
+  .pin{position:absolute;font-size:24px;transform:translate(-50%,-100%);filter:drop-shadow(0 3px 3px rgba(0,0,0,.18))}
+  .fab{position:absolute;right:16px;bottom:16px;width:54px;height:54px;border-radius:50%;background:var(--rose);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 10px 24px -6px rgba(255,77,131,.6);cursor:pointer;z-index:3}
+
+  /* chat */
+  .bub{max-width:78%;padding:9px 13px;border-radius:16px;font-size:13.5px;line-height:1.4;word-wrap:break-word}
+  .bub.me{background:var(--rose);color:#fff;align-self:flex-end;border-bottom-right-radius:5px}
+  .bub.you{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:5px}
+  .chatbar{flex:0 0 auto;display:flex;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);background:#fff}
+  .chatbar input{flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 15px;font-family:var(--sans);font-size:13.5px;outline:0}
+  .chatbar .snd{width:42px;height:42px;border-radius:50%;background:var(--rose);color:#fff;border:0;font-size:18px;cursor:pointer;flex:0 0 auto}
+
+  /* ai */
+  .ai-card{background:var(--ai-l);border:1px solid var(--ai-bd);border-radius:14px;padding:12px;font-size:13px;color:#46357f;line-height:1.55}
+  .ai-card .t{font-weight:800;color:var(--ai-d);display:flex;align-items:center;gap:6px;margin-bottom:3px}
+  .ai-card b{color:var(--ai-d)}
+  .dots span{display:inline-block;width:7px;height:7px;background:var(--ai);border-radius:50%;margin:0 1px;animation:bnc 1.2s infinite}
+  .dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+  @keyframes bnc{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+
+  /* receiver experience */
+  .exp{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;
+    background:radial-gradient(125% 100% at 50% 0%,#ffe6f1,#f4ebff);position:relative;text-align:center}
+  .exp .star{position:absolute;color:var(--rose);opacity:.5;font-size:13px;animation:tw 3s ease-in-out infinite}
+  @keyframes tw{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:.9;transform:scale(1.3)}}
+  .env{font-size:74px;animation:fl 4s ease-in-out infinite;filter:drop-shadow(0 8px 14px rgba(216,51,106,.25))}
+  @keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  .lyr{background:rgba(255,255,255,.95);border:1px solid var(--rose-bd);border-radius:14px;padding:13px;font-size:13px;width:90%;box-shadow:0 8px 18px -10px rgba(216,51,106,.3)}
+  .coupon{background:#fff;color:var(--rose-d);border:1.6px dashed var(--rose);border-radius:12px;padding:11px;font-size:13px;font-weight:700;text-align:center;width:90%}
+
+  /* bottom nav */
+  .bn{flex:0 0 auto;display:none;border-top:1px solid var(--line);background:rgba(255,255,255,.97);
+    backdrop-filter:blur(8px);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+  .device.tab .bn{display:flex}
+  .bn a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;padding:4px 0}
+  .bn a .ic{font-size:21px;filter:grayscale(.4) opacity(.7)}
+  .bn a.on{color:var(--rose)}
+  .bn a.on .ic{filter:none}
+
+  /* toast */
+  .toast{position:absolute;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);
+    background:rgba(40,30,50,.94);color:#fff;padding:11px 18px;border-radius:13px;font-size:13px;font-weight:600;
+    opacity:0;transition:.3s;z-index:50;pointer-events:none;max-width:84%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* push banner */
+  .pushwrap{position:absolute;top:46px;left:0;right:0;z-index:55;display:flex;flex-direction:column;gap:8px;padding:0 12px;pointer-events:none}
+  .push{background:rgba(255,255,255,.98);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;gap:11px;
+    box-shadow:0 16px 34px -14px rgba(40,20,50,.4);pointer-events:auto;cursor:pointer;
+    animation:drop .4s cubic-bezier(.2,.8,.2,1);text-align:left}
+  @keyframes drop{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:none}}
+  .push .pic{flex:0 0 auto;width:38px;height:38px;border-radius:11px;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px}
+  .push .ptx{font-size:12.5px;line-height:1.4;color:var(--ink)}
+  .push .ptx b{font-weight:800}
+  .push .ptx .pt{font-size:11px;color:var(--muted)}
+
+  /* sheet (simulate / jump) */
+  .sheetwrap{position:fixed;inset:0;background:rgba(30,15,40,.4);display:none;align-items:flex-end;justify-content:center;z-index:200}
+  .sheetwrap.open{display:flex}
+  .sheet{background:#fff;width:100%;max-width:412px;border-radius:24px 24px 0 0;padding:10px 16px 24px;animation:up .3s cubic-bezier(.2,.8,.2,1);max-height:80vh;overflow-y:auto}
+  @keyframes up{from{transform:translateY(100%)}to{transform:none}}
+  .sheet .grab{width:40px;height:5px;border-radius:9px;background:#ddd;margin:6px auto 12px}
+  .sheet h3{margin:0 0 4px;font-family:var(--serif);font-size:18px}
+  .sheet .sd{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .simrow{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;margin-bottom:9px;cursor:pointer;transition:.15s}
+  .simrow:active{background:var(--soft)}
+  .simrow .se{font-size:22px}
+  .simrow .st{font-weight:700;font-size:14px}
+  .simrow .ss{font-size:11.5px;color:var(--muted)}
+  .jumpgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .jumpgrid button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 8px;font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;text-align:left}
+  .jumpgrid button:active{background:var(--soft)}
+
+  /* demo toolbar */
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .tbtn{border:0;background:#fff;color:var(--ink-soft);border-radius:999px;padding:9px 15px;font-family:var(--sans);
+    font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 6px 16px -8px rgba(60,25,70,.3);display:flex;align-items:center;gap:6px}
+  .tbtn:active{transform:scale(.97)}
+  .tbtn.on{background:var(--rose);color:#fff}
+  .tbtn.sim{background:var(--rose);color:#fff}
+  .credit{font-size:11px;color:#8a7e94;text-align:center}
+
+  /* tap hint pulse */
+  .hintmode [data-nav],.hintmode [data-act]{position:relative}
+  .hintmode .btn[data-nav],.hintmode .btn[data-act],
+  .hintmode .fab,.hintmode .box.sel[data-nav]{animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,131,.0)}50%{box-shadow:0 0 0 5px rgba(255,77,131,.35)}}
+
+  @media (max-width:430px){
+    body{padding:0;gap:0;justify-content:flex-start}
+    .device{width:100vw;height:100dvh;border-radius:0;padding:0;box-shadow:none}
+    .scrn{border-radius:0}
+    .island{display:none}
+    .status{height:30px;padding-top:6px}
+    .toolbar{position:fixed;bottom:10px;left:0;right:0;z-index:210}
+    .credit{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="device" id="device">
+  <div class="island"></div>
+  <div class="scrn">
+    <div class="status"><span id="clock">21:09</span><span class="rgt">📶 🔋</span></div>
+    <div class="pushwrap" id="pushwrap"></div>
+    <div class="view"><div class="screen" id="screen"></div></div>
+    <nav class="bn" id="bn"></nav>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="tbtn" data-tool="restart">⟲ Restart</button>
+  <button class="tbtn sim" data-tool="simulate">🔔 จำลองเหตุการณ์</button>
+  <button class="tbtn" data-tool="jump">☰ ไปหน้า</button>
+  <button class="tbtn" data-tool="hints">👆 Tap hints</button>
+</div>
+<div class="credit">OurSpace · playable prototype — กดเล่นได้จริง · ▶ ปุ่มล่างช่วย demo</div>
+
+<div class="sheetwrap" id="sheetwrap"><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ============ STATE ============ */
+const LOVE=['💕','💞','💗','❤️','🥰','💑','💌','😍'];
+const DEFAULT=()=>({
+  nickMe:'ปุ้ย', nickPartner:'เบบี๋', meIcon:'🐰', partnerIcon:'🐻',
+  days:412, anniv:23,
+  places:[
+    {name:'ทะเลหัวหิน',emoji:'🌊',tag:'ที่แรกที่ไปด้วยกัน',date:true,x:22,y:26},
+    {name:'ร้านชาบู สาขาสยาม',emoji:'🍲',tag:'เดทครั้งที่ 3',date:true,x:64,y:48},
+    {name:'คาเฟ่ในซอย',emoji:'☕',tag:'',date:false,x:40,y:66},
+  ],
+  diary:[
+    {place:'ทะเลหัวหิน',date:'12 มิ.ย.',text:'ทริปแรกของเรา ❤️',ph:true},
+    {place:'คาเฟ่ในซอย',date:'5 มิ.ย.',text:'กาแฟอร่อยมาก',ph:false},
+  ],
+  chat:[
+    {who:'you',t:'คืนนี้กินไรดี~'},
+    {who:'me',t:'ชาบูไหม 🥢'},
+    {who:'you',t:'เอาๆ คิดถึงงง'},
+  ],
+  mood:{me:'🙂',you:'😀'},
+  soo:{reason:'ลืมวันสำคัญ',tone:'จริงใจ',template:'เส้นทางความทรงจำ'},
+  draftPlace:{name:'',cat:'เที่ยว'},
+});
+let S=DEFAULT();
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const lover=()=>rnd(LOVE);
+
+/* ============ ENGINE ============ */
+const screenEl=document.getElementById('screen');
+const bnEl=document.getElementById('bn');
+const deviceEl=document.getElementById('device');
+let stack=['splash'];
+const TAB_SCREENS=['home','chat','places','me'];
+const TAB_OF={home:'home',chat:'chat',places:'places',me:'me'};
+
+function nav(id,{back=false,replace=false}={}){
+  if(replace) stack[stack.length-1]=id;
+  else if(back){ if(stack.length>1) stack.pop(); }
+  else stack.push(id);
+  render(back);
+}
+function goBack(){ if(stack.length>1){stack.pop();render(true);} }
+function cur(){ return stack[stack.length-1]; }
+
+function render(back){
+  const id=cur();
+  const view=V[id]?V[id]():'<div class="body center"><div class="sub">— ยังไม่มีหน้านี้ —</div></div>';
+  screenEl.innerHTML=view;
+  screenEl.classList.remove('anim','back');void screenEl.offsetWidth;
+  screenEl.classList.add(back?'back':'anim');
+  // bottom nav
+  const isTab=TAB_SCREENS.includes(id);
+  deviceEl.classList.toggle('tab',isTab);
+  if(isTab) renderNav(TAB_OF[id]);
+  screenEl.scrollTop=0;
+}
+function renderNav(active){
+  const tabs=[['home','🏠','หน้าหลัก'],['chat','💬','แชท'],['places','📍','สถานที่'],['me','👤','ฉัน']];
+  bnEl.innerHTML=tabs.map(([id,ic,la])=>
+    `<a data-nav="${id}" class="${id===active?'on':''}"><span class="ic">${ic}</span>${la}</a>`).join('');
+}
+
+/* delegated events */
+document.addEventListener('click',e=>{
+  const nv=e.target.closest('[data-nav]'); const ac=e.target.closest('[data-act]'); const bk=e.target.closest('[data-back]');
+  const tl=e.target.closest('[data-tool]'); const jp=e.target.closest('[data-jump]'); const sm=e.target.closest('[data-sim]');
+  if(bk){goBack();return;}
+  if(tl){tool(tl.dataset.tool);return;}
+  if(jp){closeSheet();stack=[jp.dataset.jump];render();return;}
+  if(sm){closeSheet();simulate(sm.dataset.sim);return;}
+  if(ac){ACT[ac.dataset.act]&&ACT[ac.dataset.act](e);return;}
+  if(nv){nav(nv.dataset.nav);return;}
+});
+
+/* ============ helpers ============ */
+function ab(title,{back=false,accent='',right=''}={}){
+  return `<div class="ab ${accent}">${back?'<span class="bk" data-back>‹</span>':''}<span>${title}</span>${right?`<span class="r">${right}</span>`:''}</div>`;
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function pushB({pic='💞',accent='rose',title,body,nav:to}){
+  const w=document.getElementById('pushwrap');
+  const el=document.createElement('div'); el.className='push';
+  el.innerHTML=`<div class="pic" style="${accent==='ai'?'background:var(--ai)':''}">${pic}</div>
+    <div class="ptx"><div class="pt">OurSpace · เดี๋ยวนี้</div>${title?`<b>${title}</b><br>`:''}${body}</div>`;
+  el.onclick=()=>{ el.remove(); if(to) nav(to); };
+  w.appendChild(el);
+  setTimeout(()=>{ if(el.isConnected){el.style.transition='.3s';el.style.opacity='0';el.style.transform='translateY(-14px)';setTimeout(()=>el.remove(),300);} },6500);
+}
+
+/* ============ VIEWS ============ */
+const V={};
+
+/* ---- splash ---- */
+V.splash=()=>`
+  <div class="body center" style="background:radial-gradient(125% 80% at 50% 0%,#ffe1ec,#fdfbff)">
+    <div class="emoji" style="font-size:64px">💞</div>
+    <div class="h" style="font-size:34px">Our<span style="color:var(--rose);font-style:italic">Space</span></div>
+    <div class="sub">พื้นที่ของเราสองคน</div>
+    <div class="spacer"></div>
+    <button class="btn" data-nav="ob1">เริ่มใช้งาน</button>
+    <button class="btn ghost" data-nav="home">ข้ามไป Home (เคยใช้แล้ว)</button>
+  </div>`;
+
+/* ---- onboarding ---- */
+V.ob1=()=>ab('ตั้งค่าความเป็นเรา',{back:true,right:'1/4'})+`
+  <div class="body center">
+    <div class="emoji">💌</div>
+    <div class="h">เราเรียกกันว่าอะไร?</div>
+    <div class="sub">ชื่อนี้จะใช้ในแจ้งเตือนและที่ AI พูดถึงกัน</div>
+    <div class="fld" style="width:100%;text-align:left"><div class="l">คุณเรียกเขาว่า</div>
+      <input id="inP" value="${S.nickPartner}" /></div>
+    <div class="fld" style="width:100%;text-align:left"><div class="l">ให้เขาเรียกคุณว่า</div>
+      <input id="inM" value="${S.nickMe}" /></div>
+    <div class="spacer"></div>
+    <button class="btn" data-act="saveNicks">ถัดไป</button>
+  </div>`;
+V.ob2=()=>ab('ตั้งค่าความเป็นเรา',{back:true,right:'2/4'})+`
+  <div class="body">
+    <div class="sec">ภาพโปรไฟล์คู่</div>
+    <div class="pho" style="height:150px">🖼️</div>
+    <div class="sub">เลือกภาพที่มีความหมายกับเราที่สุด</div>
+    <div class="fld"><div class="l">แคปชั่น</div><div class="v">ทะเลครั้งแรกของเรา 🌊</div></div>
+    <div class="row"><button class="btn line sm">📷 ถ่าย</button><button class="btn line sm">🖼️ คลังภาพ</button></div>
+    <div class="spacer"></div>
+    <button class="btn" data-nav="ob3">ถัดไป</button>
+  </div>`;
+V.ob3=()=>ab('ตั้งค่าความเป็นเรา',{back:true,right:'3/4'})+`
+  <div class="body">
+    <div class="sec">วันสำคัญของเรา</div>
+    <div class="fld"><div class="l">วันเกิดคุณ</div><div class="v">12 มี.ค.</div></div>
+    <div class="fld"><div class="l">วันเกิด${S.nickPartner}</div><div class="v">18 มิ.ย.</div></div>
+    <div class="fld"><div class="l">วันเจอกันครั้งแรก</div><div class="v">14 ก.พ. 2024</div></div>
+    <div class="fld"><div class="l">วันเริ่มคบ</div><div class="v">1 พ.ค. 2024</div></div>
+    <div class="spacer"></div>
+    <button class="btn" data-nav="ob4">เกือบเสร็จแล้ว →</button>
+  </div>`;
+V.ob4=()=>ab('ยินดีต้อนรับ 🎉',{accent:'rose'})+`
+  <div class="body center">
+    <div class="emoji">💞</div>
+    <div class="h">${S.nickMe} & ${S.nickPartner}</div>
+    <div class="sub">เพิ่มวันสำคัญให้อัตโนมัติ 4 รายการแล้ว<br>เริ่มเก็บความทรงจำกันเลย</div>
+    <div class="spacer"></div>
+    <button class="btn" data-nav="pair">ถัดไป — จับคู่กับ${S.nickPartner}</button>
+  </div>`;
+
+/* ---- pairing ---- */
+V.pair=()=>ab('จับคู่กับคนพิเศษ',{back:true})+`
+  <div class="body center">
+    <div class="h">เชิญ${S.nickPartner} 💌</div>
+    <div class="card" style="width:100%"><div style="width:128px;height:128px;margin:0 auto;border:5px solid #fff;outline:1px solid var(--line);
+      background:repeating-linear-gradient(0deg,#222 0 7px,#fff 7px 14px),repeating-linear-gradient(90deg,#222 0 7px,transparent 7px 14px);background-blend-mode:screen"></div>
+      <div class="sub" style="margin-top:8px">ให้${S.nickPartner}สแกน QR นี้</div></div>
+    <div class="box" style="width:100%;text-align:center;font-size:20px;letter-spacing:5px;font-weight:800;color:var(--rose-d)">LOVE-7842</div>
+    <button class="btn line" data-act="copyLink">คัดลอกลิงก์เชิญ</button>
+    <div class="spacer"></div>
+    <button class="btn" data-act="paired">เชื่อมต่อสำเร็จ (จำลอง)</button>
+  </div>`;
+
+/* ---- home ---- */
+V.home=()=>ab('OurSpace 💞',{accent:'rose',right:S.nickMe+' & '+S.nickPartner})+`
+  <div class="body">
+    <div class="card" style="background:linear-gradient(135deg,#fff0f5,#f3ecff);border-color:#f0d9e8;text-align:center">
+      <div class="row" style="justify-content:center;gap:6px;display:flex"><div class="av">${S.meIcon}</div><div class="av">${S.partnerIcon}</div></div>
+      <div class="big" style="font-size:24px;margin-top:8px">รักกันมาแล้ว ${S.days} วัน</div>
+      <div class="sub">❤️ ครบรอบถัดไป อีก ${S.anniv} วัน</div>
+    </div>
+    <div class="grid2">
+      <div class="box sel" style="text-align:center;cursor:pointer" data-nav="soo1"><div style="font-size:26px">😔</div><b>ง้อ</b></div>
+      <div class="box" style="text-align:center;cursor:pointer" data-act="poke"><div style="font-size:26px">👉</div><b>แตะหา${S.nickPartner}</b></div>
+    </div>
+    <div class="card" style="cursor:pointer" data-nav="dates">
+      <div style="display:flex;align-items:center;gap:10px"><div style="font-size:24px">🎂</div>
+      <div><div class="ttl" style="font-weight:800">ครบรอบ 1 ปี · อีก 45 วัน</div><div class="sub">แตะดูวันสำคัญทั้งหมด</div></div>
+      <div class="spacer"></div><span style="color:var(--muted)">›</span></div>
+    </div>
+    <div class="sec">อารมณ์วันนี้</div>
+    <div class="row">
+      <div class="box" style="text-align:center">คุณ<div style="font-size:24px">${S.mood.me}</div></div>
+      <div class="box" style="text-align:center">${S.nickPartner}<div style="font-size:24px">${S.mood.you}</div></div>
+    </div>
+    <div class="sec">ไดอารี่ล่าสุด</div>
+    ${S.diary.slice(0,3).map(d=>`<div class="box"><b>📍 ${d.place}</b> · ${d.date}<br>${d.text}</div>`).join('')}
+  </div>`;
+
+/* ---- chat ---- */
+V.chat=()=>ab('💕 '+S.nickPartner,{right:'ออนไลน์'})+`
+  <div class="body" id="chatbody" style="gap:8px;padding-bottom:8px">
+    ${S.chat.map(m=>`<div class="bub ${m.who}">${m.t}</div>`).join('')}
+  </div>
+  <div class="chatbar">
+    <input id="chatin" placeholder="พิมพ์ข้อความ…" autocomplete="off">
+    <button class="snd" data-act="sendChat">↑</button>
+  </div>`;
+
+/* ---- places ---- */
+V.places=()=>ab('สถานที่ของเรา',{right:S.places.length+' หมุด'})+`
+  <div class="body" style="padding-bottom:8px">
+    <div class="map" style="flex:none;height:200px">
+      ${S.places.map(p=>`<span class="pin" style="left:${p.x}%;top:${p.y}%">${p.date?'💕':'📍'}</span>`).join('')}
+      <div class="fab" data-nav="addp1">+</div>
+    </div>
+    <div class="sec">ที่บันทึกไว้</div>
+    ${S.places.map(p=>`<div class="box" style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">${p.emoji||'📍'}</span>
+      <div><b>${p.name}</b>${p.tag?`<div class="sub">${p.date?'💕 ':''}${p.tag}</div>`:''}</div></div>`).join('')}
+    <button class="btn line" data-nav="geo">📡 ตั้งแจ้งเตือนเมื่อเข้าใกล้ที่เคยเดท</button>
+  </div>`;
+
+/* ---- me ---- */
+V.me=()=>ab('ฉัน')+`
+  <div class="body">
+    <div class="center-col"><div class="av" style="width:72px;height:72px;font-size:32px">${S.meIcon}</div>
+      <div class="h2">${S.nickMe} & ${S.nickPartner}</div><div class="sub">คบกันตั้งแต่ 1 พ.ค. 2024</div></div>
+    <div class="box" style="cursor:pointer" data-act="editNick"><b>✏️ โปรไฟล์เรา + แก้ชื่อเล่น</b><div class="sub">คุณเรียกเขาว่า “${S.nickPartner}” · เขาเรียกคุณว่า “${S.nickMe}”</div></div>
+    <div class="box"><b>💝 โปรไฟล์ ${S.nickPartner} (ชอบ/ไม่ชอบ)</b>
+      <div class="chips" style="margin-top:7px"><span class="chip">ชอบ: ชาบู</span><span class="chip">ชอบ: คาเฟ่เงียบ</span><span class="chip">ไม่ชอบ: ผักชี</span></div></div>
+    <div class="box"><b>📍 การแชร์ตำแหน่ง</b><div class="sub">ยินยอม 2 ฝ่าย · 🟢 กำลังแชร์ · หยุดได้ตลอด</div></div>
+    <div class="box"><b>📊 สถิติเรา</b><div class="sub">${S.days} วัน · ${S.diary.length} ความทรงจำ · ${S.places.length} สถานที่</div></div>
+    <div class="box"><b>💎 อัปเกรด Premium</b><div class="sub">ปลดล็อก AI ง้อ/วิเคราะห์ความเข้ากัน</div></div>
+  </div>`;
+
+/* ---- add place (flow A) ---- */
+V.addp1=()=>ab('เพิ่มสถานที่',{back:true})+`
+  <div class="body">
+    <div class="sec">บันทึกจาก</div>
+    <div class="box sel" data-nav="addp2">📍 ตำแหน่งปัจจุบัน</div>
+    <div class="box" data-nav="addp2">🔎 ค้นหาชื่อสถานที่</div>
+    <div class="box" data-nav="addp2">🗺️ ปักหมุดบนแผนที่เอง</div>
+    <div class="box" data-nav="addp2">🖼️ จากรูปภาพ (อ่านพิกัด EXIF)</div>
+  </div>`;
+V.addp2=()=>ab('รายละเอียดสถานที่',{back:true})+`
+  <div class="body">
+    <div class="map" style="flex:none;height:120px"><span class="pin" style="left:50%;top:60%;font-size:28px">📍</span></div>
+    <div class="fld"><div class="l">ชื่อสถานที่</div><input id="plName" placeholder="เช่น ร้านพิซซ่าริมทะเล" value=""></div>
+    <div class="sec">หมวด</div>
+    <div class="chips" id="plCat">
+      <span class="chip on">เที่ยว</span><span class="chip">คาเฟ่</span><span class="chip">ร้านอาหาร</span><span class="chip">พิเศษ</span></div>
+    <div class="box sel">💕 นี่คือที่ที่เราเคยมาเดทกัน</div>
+    <div class="box sel">📔 โพสต์ลงไดอารี่ด้วย</div>
+    <div class="spacer"></div>
+    <button class="btn" data-act="savePlace">บันทึกสถานที่</button>
+  </div>`;
+
+/* ---- dates (flow B, condensed) ---- */
+V.dates=()=>ab('วันสำคัญ',{back:true,right:'＋'})+`
+  <div class="body">
+    <div class="card" style="background:#fff0f5;border-color:#f0d9e8;text-align:center"><div class="sub">ครบรอบ 14 เดือน</div><div class="big">อีก ${S.anniv} วัน</div></div>
+    <div class="box">🎂 วันเกิด${S.nickPartner} · 18 มิ.ย. <span class="sub">· เตือนล่วงหน้า 3 วัน</span></div>
+    <div class="box">💍 วันแรกที่เจอกัน · 14 ก.พ.</div>
+    <div class="box">🍰 ครบรอบ 1 ปี · 1 พ.ค. <span class="sub">· อีก 45 วัน</span></div>
+    <button class="btn line" data-nav="dateAdd">＋ เพิ่มวันสำคัญ</button>
+  </div>`;
+V.dateAdd=()=>ab('เพิ่มวันสำคัญ',{back:true})+`
+  <div class="body">
+    <div class="sec">ประเภท</div>
+    <div class="box sel">❤️ ครบรอบความรัก</div><div class="box">🎂 วันเกิด</div><div class="box">✏️ กำหนดเอง</div>
+    <div class="fld"><div class="l">วันที่</div><div class="v">1 ส.ค. 2025</div></div>
+    <div class="sec">เตือนล่วงหน้า</div>
+    <div class="chips"><span class="chip on">วันนั้น</span><span class="chip on">1 วันก่อน</span><span class="chip">3 วัน</span><span class="chip on">1 สัปดาห์</span></div>
+    <div class="box sel">👫 แจ้งทั้งสองคน</div>
+    <div class="spacer"></div>
+    <button class="btn" data-act="saveDate">บันทึก + ตั้งเตือน</button>
+  </div>`;
+
+/* ---- geofence config (flow D) ---- */
+V.geo=()=>ab('แจ้งเตือนเข้าใกล้',{back:true})+`
+  <div class="body">
+    <div class="box sel">🔔 เปิดแจ้งเตือนเมื่อเข้าใกล้ที่เคยเดท</div>
+    <div class="sec">รัศมี</div>
+    <div class="slider"></div><div class="spread"><span>100 ม.</span><span>300 ม.</span><span>1 กม.</span></div>
+    <div class="sec">ใครเข้าใกล้แล้วเด้ง</div>
+    <div class="chips"><span class="chip">ฉัน</span><span class="chip">${S.nickPartner}</span><span class="chip on">ทั้งคู่</span></div>
+    <div class="sec">แจ้งใคร</div>
+    <div class="chips"><span class="chip on">คนที่ผ่าน</span><span class="chip on">อีกฝ่าย</span></div>
+    <div class="box"><b>ตัวอย่างข้อความ</b><div class="sub" style="margin-top:4px">คนผ่าน: “คุณผ่านที่เคยเดทกับ ${S.nickPartner} 💕”<br>อีกฝ่าย: “${S.nickMe} ผ่านที่ที่เราเคยมาเดทกัน…”</div></div>
+    <div class="spacer"></div>
+    <button class="btn" data-act="saveGeo">บันทึก</button>
+    <button class="btn line sm" data-sim="geofence">▶ ลองจำลองเดินผ่านเลย</button>
+  </div>`;
+V.placeMemory=()=>ab('ความทรงจำของเรา 💕',{back:true,accent:'rose'})+`
+  <div class="body center">
+    <div class="card" style="width:100%;text-align:left">
+      <div class="pho" style="height:120px">🖼️</div>
+      <div class="ttl" style="font-weight:800;margin-top:8px">ร้านชาบู สาขาสยาม</div>
+      <div class="sub">เดทครั้งที่ 3 · 20 ก.พ. 2024 · กินจนพุงกาง</div>
+    </div>
+    <div class="row" style="width:100%"><button class="btn line" data-nav="chat">💬 บอกว่าคิดถึง</button><button class="btn" data-act="inviteAgain">📅 ชวนมาอีก</button></div>
+  </div>`;
+
+/* ---- soo sender (flow C) ---- */
+V.soo1=()=>ab('ง้อ 💔→❤️',{back:true,accent:'rose'})+`
+  <div class="body center">
+    <div class="emoji">🥺</div><div class="h">อยากง้อ${S.nickPartner}ใช่ไหม?</div>
+    <button class="btn ghost" data-act="sooSimple">💬 ง้อเองแบบง่ายๆ</button>
+    <button class="btn ai" data-nav="soo2">✨ ให้ AI ช่วยสร้างประสบการณ์ง้อ</button>
+    <div class="sub">AI จะออกแบบ “เซอร์ไพรส์ง้อ” ส่งให้เปิดทีละชั้น</div>
+  </div>`;
+V.soo2=()=>ab('✨ บอก AI หน่อย',{back:true,accent:'ai'})+`
+  <div class="body">
+    <div class="sec">เกิดอะไรขึ้น?</div>
+    <div class="chips"><span class="chip on">ลืมวันสำคัญ</span><span class="chip">มาสาย</span><span class="chip">พูดแรงไป</span><span class="chip">งอนไม่บอกเหตุ</span></div>
+    <div class="sec">หนักแค่ไหน</div><div class="slider"></div><div class="spread"><span>งอนนิดๆ</span><span>โกรธมาก</span></div>
+    <div class="sec">อยากได้โทนไหน</div>
+    <div class="chips"><span class="chip ai on">จริงใจ</span><span class="chip ai">ขำๆ</span><span class="chip ai">หวานๆ</span></div>
+    <div class="spacer"></div>
+    <button class="btn ai" data-act="sooAnalyze">ให้ AI วิเคราะห์ →</button>
+  </div>`;
+V.soo3=()=>ab('✨ AI กำลังคิด…',{back:true,accent:'ai'})+`
+  <div class="body">
+    <div class="ai-card"><div class="t">🧠 วิเคราะห์ ${S.nickPartner} <span class="dots"><span></span><span></span><span></span></span></div></div>
+    <div class="ai-card">${S.nickPartner} เป็น <b>INFJ</b> · ภาษารัก = <b>Quality Time</b><br>เกลียดคำขอโทษลอยๆ ชอบการกระทำ</div>
+    <div class="ai-card">🍜 ของโปรด: <b>ชาบู</b> · คาเฟ่เงียบๆ</div>
+    <div class="ai-card" style="background:linear-gradient(135deg,var(--ai-l),#faf7ff)">→ แนะนำ: ง้อด้วย “การกระทำ + แผนใช้เวลาด้วยกัน”</div>
+    <div class="spacer"></div>
+    <button class="btn ai" data-nav="soo4">ดูรูปแบบที่ AI แนะนำ →</button>
+  </div>`;
+V.soo4=()=>ab('✨ เลือกรูปแบบ',{back:true,accent:'ai'})+`
+  <div class="body">
+    <div class="sec">AI แนะนำสำหรับ ${S.nickPartner}</div>
+    <div class="box sel">🗺️ เส้นทางความทรงจำ → จบที่คำขอโทษ</div>
+    <div class="box">💌 จดหมายเปิดทีละชั้น</div>
+    <div class="box">💗 ปลดล็อกหัวใจ</div>
+    <div class="box">🍽️ คำเชิญลับ → ร้านชาบูที่ชอบ</div>
+    <div class="spacer"></div>
+    <button class="btn ai" data-nav="soo5">พรีวิว →</button>
+  </div>`;
+V.soo5=()=>ab('✨ พรีวิว & แก้ไข',{back:true,accent:'ai'})+`
+  <div class="body">
+    <div class="sub">ประสบการณ์ที่ ${S.nickPartner} จะเห็น (3 ชั้น)</div>
+    <div class="box">ชั้น 1 · 📷 รูปวันแรกเจอ <span style="color:var(--ai)">✎</span><div class="sub">“จำวันนี้ได้ไหม…”</div></div>
+    <div class="box">ชั้น 2 · 💬 ข้อความขอโทษ (AI ร่าง) <span style="color:var(--ai)">✎</span><div class="sub">“เราผิดเองที่ลืม…”</div></div>
+    <div class="box sel">ชั้น 3 · 🍽️ คำเชิญไปชาบู + ปุ่มยกโทษ</div>
+    <div class="row"><div class="box" style="text-align:center">🎙️ เสียง</div><div class="box" style="text-align:center">🖼️ รูป</div></div>
+    <div class="spacer"></div>
+    <button class="btn ai" data-nav="soo6">แนบของจริง →</button>
+  </div>`;
+V.soo6=()=>ab('✨ แนบของจริง + ส่ง',{back:true,accent:'ai'})+`
+  <div class="body">
+    <div class="sec">การกระทำจริง</div>
+    <div class="coupon" style="border-color:var(--ai);color:var(--ai-d);width:100%">🍽️ จองโต๊ะร้านชาบู ส. นี้ 19:00</div>
+    <div class="box">🎟️ แถมคูปอง: “ทำกับข้าวให้ 1 มื้อ”</div>
+    <div class="sec">ส่งเมื่อไหร่</div>
+    <div class="chips"><span class="chip on">ส่งเลย</span><span class="chip">ตั้งเวลา</span></div>
+    <div class="spacer"></div>
+    <button class="btn ai" data-act="sooSend">ส่งให้ ${S.nickPartner} 💌</button>
+  </div>`;
+V.sooSent=()=>ab('ส่งแล้ว 💌',{accent:'ai'})+`
+  <div class="body center">
+    <div class="emoji">💌</div><div class="h">ส่งประสบการณ์ง้อแล้ว!</div>
+    <div class="sub">${S.nickPartner} จะได้รับการแจ้งเตือน<br>ลองดูว่าฝั่ง${S.nickPartner}เห็นอะไร</div>
+    <div class="spacer"></div>
+    <button class="btn ai" data-nav="recv1">▶ ดูต่อมุม${S.nickPartner} (คนรับ)</button>
+    <button class="btn ghost" data-nav="home">กลับหน้าหลัก</button>
+  </div>`;
+
+/* ---- soo receiver ---- */
+V.recv1=()=>`<div class="screen-inner">${ab('',{accent:''})}</div>
+  <div class="exp">
+    <span class="star" style="top:12%;left:14%">✦</span><span class="star" style="top:20%;right:16%;animation-delay:.6s">✦</span>
+    <span class="star" style="bottom:24%;left:20%;animation-delay:1s">✦</span><span class="star" style="bottom:14%;right:18%;animation-delay:.3s">✧</span>
+    <div class="env">💌</div>
+    <div class="h" style="color:var(--rose-d)">${S.nickMe} มีอะไรอยากบอก…</div>
+    <button class="coupon" data-nav="recv2" style="cursor:pointer">แตะเพื่อเปิดซอง</button>
+  </div>`;
+V.recv2=()=>`<div class="exp">
+    <div class="sub">ชั้น 2 / 3</div>
+    <div class="lyr">📷 รูปวันแรกเจอ — “จำวันนี้ได้ไหม…”</div>
+    <div class="lyr">💬 “เราผิดเองที่ลืม… ขอโทษจริงๆ นะ”</div>
+    <button class="coupon" data-nav="recv3" style="cursor:pointer">แตะคลี่ชั้นสุดท้าย →</button>
+  </div>`;
+V.recv3=()=>`<div class="exp">
+    <div class="env" style="font-size:54px">🌹</div>
+    <div class="h" style="color:var(--rose-d)">“ขอโทษนะ ส.นี้ไปกินชาบูที่เธอชอบกัน?”</div>
+    <div class="coupon">🍽️ จองโต๊ะไว้แล้ว · ส. 19:00</div>
+    <button class="btn ok" style="width:80%" data-act="sooForgive">ยกโทษให้ 💕</button>
+    <button class="btn ghost sm" style="width:80%" data-act="sooDefer">ขอเวลาคิดแป๊บ…</button>
+  </div>`;
+V.reconciled=()=>ab('คืนดีแล้ว 🎉',{accent:'rose'})+`
+  <div class="body center">
+    <div class="emoji">❤️</div><div class="h">งอนหายแล้ว!</div>
+    <div class="sub">ทั้งคู่เห็นหน้านี้พร้อมกัน · สถานะ “งอน” ถูกล้าง<br>🍽️ เดทชาบู ส.นี้ ถูกเพิ่มในวันสำคัญ</div>
+    <div class="spacer"></div>
+    <button class="btn" data-nav="home">กลับหน้าหลัก</button>
+    <button class="btn line sm" data-tool="restart">เริ่มดูใหม่ตั้งแต่ต้น</button>
+  </div>`;
+
+/* ============ ACTIONS ============ */
+const ACT={
+  saveNicks(){
+    const p=document.getElementById('inP').value.trim()||'เบบี๋';
+    const m=document.getElementById('inM').value.trim()||'ปุ้ย';
+    S.nickPartner=p; S.nickMe=m; nav('ob2');
+  },
+  copyLink(){ toast('คัดลอกลิงก์เชิญแล้ว 🔗'); },
+  paired(){ toast('จับคู่กับ '+S.nickPartner+' สำเร็จ 💞'); setTimeout(()=>{stack=['home'];render();},700); },
+  poke(){ toast('แตะหา '+S.nickPartner+' แล้ว 👉'); },
+  sendChat(){
+    const inp=document.getElementById('chatin'); const t=(inp.value||'').trim(); if(!t)return;
+    S.chat.push({who:'me',t});
+    const body=document.getElementById('chatbody');
+    body.insertAdjacentHTML('beforeend',`<div class="bub me">${esc(t)}</div>`);
+    inp.value=''; body.scrollTop=body.scrollHeight;
+    const replies=['คิดถึงเหมือนกันน้า 🥰','โอเครักๆ','555 ตลอดเลย','แล้วเจอกันนะ ❤️','จัาาา','เดี๋ยวกลับไปหานะ'];
+    setTimeout(()=>{
+      const r=rnd(replies); S.chat.push({who:'you',t:r});
+      body.insertAdjacentHTML('beforeend',`<div class="bub you">${r}</div>`); body.scrollTop=body.scrollHeight;
+    },900);
+  },
+  savePlace(){
+    const nm=(document.getElementById('plName').value||'').trim()||'สถานที่ใหม่';
+    const on=document.querySelector('#plCat .chip.on'); const cat=on?on.textContent:'เที่ยว';
+    S.places.push({name:nm,emoji:'📍',tag:cat+' · เพิ่งเพิ่ม',date:true,x:30+Math.floor(Math.random()*40),y:30+Math.floor(Math.random()*40)});
+    S.diary.unshift({place:nm,date:'วันนี้',text:'เพิ่งบันทึกความทรงจำใหม่ ❤️',ph:true});
+    toast('เพิ่ม “'+nm+'” แล้ว 📍'); stack=['places']; render();
+  },
+  saveDate(){ S.anniv=Math.max(1,S.anniv); toast('ตั้งวันสำคัญ + เตือนแล้ว 🔔'); goBack(); },
+  saveGeo(){ toast('บันทึกการแจ้งเตือนเข้าใกล้แล้ว 📡'); goBack(); },
+  inviteAgain(){ toast('สร้างคำชวนเดทแล้ว 📅'); },
+  editNick(){ stack.push('ob1'); render(); },
+  sooSimple(){ toast('ส่งคำขอโทษแล้ว 🥺'); setTimeout(()=>{stack=['home'];render();},700); },
+  sooAnalyze(){ nav('soo3'); setTimeout(()=>{ if(cur()==='soo3') nav('soo4'); },1800); },
+  sooSend(){ nav('sooSent'); },
+  sooForgive(){ nav('reconciled'); toast('คืนดีกันแล้ว 🎉'); },
+  sooDefer(){ toast('ส่งว่า “ขอเวลาคิดแป๊บ” แล้ว 🕊️'); setTimeout(()=>{stack=['home'];render();},800); },
+};
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* chip toggling (visual) */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(!c)return;
+  const wrap=c.parentElement;
+  // single-select groups: those without multi
+  if(wrap && !wrap.dataset.multi){ [...wrap.children].forEach(x=>x.classList.remove('on')); c.classList.add('on'); }
+});
+
+/* ============ SIMULATE ============ */
+function simulate(type){
+  if(type==='geofence'){
+    pushB({pic:'💞',title:'OurSpace',body:`📍 คุณกำลังผ่านที่ที่เคยมาเดทกับ <b>${S.nickPartner}</b> ${lover()}<br><span class="pt">แวะรำลึกความหลังกันไหม?</span>`,nav:'placeMemory'});
+    setTimeout(()=>pushB({pic:'💌',accent:'ai',title:'OurSpace',body:`💞 <b>${S.nickMe}</b> เพิ่งผ่านที่ที่เราเคยมาเดทกัน… <span class="pt">(นี่คือสิ่งที่${S.nickPartner}เห็น)</span>`}),1400);
+  }else if(type==='soo'){
+    pushB({pic:'💌',accent:'ai',title:'OurSpace',body:`💌 มีบางอย่างจาก ${S.nickMe}… อยากให้เปิดดูนะ`,nav:'recv1'});
+  }else if(type==='poke'){
+    pushB({pic:'👉',title:'OurSpace',body:`👉 <b>${S.nickPartner}</b> แตะหาคุณ — คิดถึงน้า ${lover()}`});
+  }else if(type==='anniv'){
+    pushB({pic:'🎂',title:'OurSpace',body:`🎂 อีก 3 วันครบรอบ 1 ปีแล้ว! เตรียมเซอร์ไพรส์ ${S.nickPartner} ไหม?`,nav:'dates'});
+  }
+}
+
+/* ============ TOOLBAR / SHEETS ============ */
+function tool(t){
+  if(t==='restart'){ S=DEFAULT(); stack=['splash']; render(); toast('เริ่มใหม่แล้ว ⟲'); }
+  else if(t==='hints'){ document.body.classList.toggle('hintmode'); document.querySelector('[data-tool="hints"]').classList.toggle('on'); }
+  else if(t==='simulate'){ openSheet(simSheet()); }
+  else if(t==='jump'){ openSheet(jumpSheet()); }
+}
+function simSheet(){
+  const rows=[
+    ['geofence','📍','เดินผ่านที่เคยเดท','เด้ง push 2 ฝั่ง (คนผ่าน + อีกฝ่าย)'],
+    ['soo','💌',`${S.nickPartner} ส่งง้อมา`,'เปิดประสบการณ์ง้อฝั่งคนรับ'],
+    ['poke','👉',`${S.nickPartner} แตะหา`,'push แตะหากัน'],
+    ['anniv','🎂','ใกล้ครบรอบ','เตือนเตรียมเซอร์ไพรส์'],
+  ];
+  return `<div class="grab"></div><h3>จำลองเหตุการณ์</h3><div class="sd">เลือกเหตุการณ์เพื่อเด้ง push ในแอป (คุมเอง)</div>
+    ${rows.map(([k,e,t,s])=>`<div class="simrow" data-sim="${k}"><div class="se">${e}</div><div><div class="st">${t}</div><div class="ss">${s}</div></div></div>`).join('')}`;
+}
+function jumpSheet(){
+  const items=[
+    ['splash','Splash'],['ob1','Onboarding'],['pair','จับคู่'],['home','Home'],['chat','แชท'],['places','สถานที่'],
+    ['me','ฉัน'],['addp1','เพิ่มสถานที่'],['dates','วันสำคัญ'],['geo','ตั้งเตือนเข้าใกล้'],['soo1','ง้อ (AI)'],['recv1','มุมคนรับง้อ'],
+  ];
+  return `<div class="grab"></div><h3>กระโดดไปหน้า</h3><div class="sd">สำหรับ present — ข้ามไปหน้าจอไหนก็ได้</div>
+    <div class="jumpgrid">${items.map(([k,la])=>`<button data-jump="${k}">${la}</button>`).join('')}</div>`;
+}
+function openSheet(html){ document.getElementById('sheet').innerHTML=html; document.getElementById('sheetwrap').classList.add('open'); }
+function closeSheet(){ document.getElementById('sheetwrap').classList.remove('open'); }
+document.getElementById('sheetwrap').addEventListener('click',e=>{ if(e.target.id==='sheetwrap') closeSheet(); });
+
+/* boot (supports #screen=home deep-link for demo/screenshot) */
+(function(){ const m=(location.hash||'').match(/screen=([A-Za-z0-9]+)/); if(m&&V[m[1]]) stack=[m[1]]; })();
+render();
+</script>
+</body>
+</html>
