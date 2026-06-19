@@ -255,10 +255,39 @@ const DEFAULT=()=>({
   mood:{me:'🙂',you:'😀'},
   soo:{reason:'ลืมวันสำคัญ',tone:'จริงใจ',template:'เส้นทางความทรงจำ'},
   draftPlace:{name:'',cat:'เที่ยว'},
+  distanceKm:'12.4', curTrip:0,
+  trips:[{name:'ทริปหัวหิน',cover:'🌊',dates:'12–14 มิ.ย.',dest:'หัวหิน',settled:false,
+    days:[
+      {day:'วันที่ 1',items:[{icon:'🏨',name:'เช็คอินโรงแรม',time:'14:00'},{icon:'🦐',name:'ซีฟู้ดริมทะเล',time:'18:30',note:'ร้านโปรด'}]},
+      {day:'วันที่ 2',items:[{icon:'☕',name:'คาเฟ่เปิดใหม่',time:'10:00'},{icon:'🏖️',name:'เดินชายหาด',time:'17:00'}]},
+    ],
+    wishlist:['ตลาดน้ำ','ไร่องุ่น','ร้านชาบู'],
+    expenses:[
+      {title:'โรงแรม 2 คืน',amount:3600,paidBy:'me',meShare:0.5,icon:'🏨'},
+      {title:'ซีฟู้ดมื้อเย็น',amount:1200,paidBy:'partner',meShare:0.5,icon:'🦐'},
+      {title:'ค่าน้ำมัน',amount:800,paidBy:'me',meShare:0.5,icon:'⛽'},
+    ]}],
+  journal:[
+    {date:'เมื่อวาน',type:'thanks',text:'ขอบคุณที่มารับตอนฝนตก ☔'},
+    {date:'2 วันก่อน',type:'learn',text:'เรียนรู้ว่าเวลาโกรธ ต้องพักก่อนค่อยคุย'},
+  ],
+  aboutNotes:{ allergy:['กุ้ง (แพ้)','ยา Penicillin'],
+    accounts:[{icon:'🎬',name:'Netflix',who:'จ่ายโดย ปุ้ย'},{icon:'🎵',name:'Spotify Duo',who:'จ่ายโดย เบบี๋'}] },
+  milestones:[
+    {title:'เก็บเงินเที่ยวญี่ปุ่น',when:'ธ.ค. 2026',loc:'โตเกียว',reason:'สร้างความทรงจำใหม่ๆ',icon:'🗾',done:false},
+    {title:'วิ่งมาราธอนด้วยกัน',when:'ก.พ. 2026',loc:'',reason:'เติบโต',icon:'🏃',done:true},
+  ],
 });
 let S=DEFAULT();
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const lover=()=>rnd(LOVE);
+const tripTotal=t=>t.expenses.reduce((s,e)=>s+e.amount,0);
+function tripBalance(t){ if(t.settled) return 0; let net=0;
+  t.expenses.forEach(e=>{ if(e.paidBy==='me') net+=e.amount*(1-e.meShare); else net-=e.amount*e.meShare; });
+  return Math.round(net); } // >0 = partner ติด me ; <0 = me ติด partner
+function splitLabel(s){ if(s===0.5) return '50/50'; if(s===1) return S.nickMe+' ออกหมด'; if(s===0) return S.nickPartner+' ออกหมด'; return S.nickMe+' '+Math.round(s*100)+'%'; }
+const baht=n=>n.toLocaleString('en-US');
+const sc=(inner,cls='')=>`<div class="body ${cls}">${inner}</div>`;
 
 /* ============ ENGINE ============ */
 const screenEl=document.getElementById('screen');
@@ -401,6 +430,7 @@ V.home=()=>ab('OurSpace 💞',{accent:'rose',right:S.nickMe+' & '+S.nickPartner}
       <div class="row" style="justify-content:center;gap:6px;display:flex"><div class="av">${S.meIcon}</div><div class="av">${S.partnerIcon}</div></div>
       <div class="big" style="font-size:24px;margin-top:8px">รักกันมาแล้ว ${S.days} วัน</div>
       <div class="sub">❤️ ครบรอบถัดไป อีก ${S.anniv} วัน</div>
+      <div class="box tap" style="margin-top:10px;cursor:pointer" data-nav="distance">📍 ตอนนี้ห่างกัน <b style="color:var(--rose-d)">${S.distanceKm} กม.</b> · แตะดู</div>
     </div>
     <div class="grid2">
       <div class="box sel" style="text-align:center;cursor:pointer" data-nav="soo1"><div style="font-size:26px">😔</div><b>ง้อ</b></div>
@@ -410,6 +440,13 @@ V.home=()=>ab('OurSpace 💞',{accent:'rose',right:S.nickMe+' & '+S.nickPartner}
       <div style="display:flex;align-items:center;gap:10px"><div style="font-size:24px">🎂</div>
       <div><div class="ttl" style="font-weight:800">ครบรอบ 1 ปี · อีก 45 วัน</div><div class="sub">แตะดูวันสำคัญทั้งหมด</div></div>
       <div class="spacer"></div><span style="color:var(--muted)">›</span></div>
+    </div>
+    <div class="sec">ของเราสองคน</div>
+    <div class="grid2">
+      <div class="box tap" style="text-align:center;cursor:pointer" data-nav="trips"><div style="font-size:24px">✈️</div><b>ทริปของเรา</b></div>
+      <div class="box tap" style="text-align:center;cursor:pointer" data-nav="journal"><div style="font-size:24px">📔</div><b>ไดอารี่/Journal</b></div>
+      <div class="box tap" style="text-align:center;cursor:pointer" data-nav="milestones"><div style="font-size:24px">🎯</div><b>Milestone</b></div>
+      <div class="box tap" style="text-align:center;cursor:pointer" data-nav="about"><div style="font-size:24px">📒</div><b>About Us</b></div>
     </div>
     <div class="sec">อารมณ์วันนี้</div>
     <div class="row">
@@ -622,6 +659,112 @@ V.reconciled=()=>ab('คืนดีแล้ว 🎉',{accent:'rose'})+`
     <button class="btn line sm" data-tool="restart">เริ่มดูใหม่ตั้งแต่ต้น</button>
   </div>`;
 
+/* ---- GPS distance ---- */
+V.distance=()=>ab('ระยะห่างของเรา',{back:true,accent:'rose'})+sc(
+  `<div style="font-size:54px">🧭</div>
+   <div class="sub">ตอนนี้ ${S.nickMe} 🐰 กับ ${S.nickPartner} 🐻</div>
+   <div class="big" style="font-size:42px">${S.distanceKm} กม.</div>
+   <div class="sub">อยู่ไกลแค่ไหนก็เหมือนใกล้ 💞</div>
+   <div class="box" style="width:100%">📍 ${S.nickMe}: กรุงเทพฯ · ${S.nickPartner}: หัวหิน</div>
+   <div class="box" style="width:100%;font-size:11px">🟢 แชร์ตำแหน่งอยู่ (ยินยอม 2 ฝ่าย) · หยุดได้ตลอด</div>
+   <button class="btn line tap" data-act="poke">👉 แตะหา${S.nickPartner}</button>`,'center');
+
+/* ---- Trips (list) ---- */
+V.trips=()=>ab('‹ ทริปของเรา',{back:true,right:'＋'})+sc(
+  S.trips.map((t,i)=>`<div class="card tap" style="cursor:pointer;padding:0;overflow:hidden" data-nav="tripDetail">
+     <div style="height:96px;background:linear-gradient(135deg,#ffd9e8,#dcd0ff);display:flex;align-items:center;justify-content:center;font-size:36px">${t.cover}</div>
+     <div style="padding:13px"><div class="ttl" style="font-weight:800;font-size:16px">${t.name}</div>
+     <div class="sub">${t.dates} · ${t.dest}</div>
+     <div class="sub">💸 ใช้ไป ${baht(tripTotal(t))} ฿ · ${t.days.length} วัน</div></div></div>`).join('')+
+  `<button class="btn line tap" data-act="comingSoon">＋ สร้างทริปใหม่</button>`);
+
+/* ---- Trip detail (itinerary) ---- */
+V.tripDetail=()=>{const t=S.trips[S.curTrip];return ab('‹ '+t.name,{back:true})+sc(
+  `<div style="height:110px;border-radius:14px;background:linear-gradient(135deg,#ffd9e8,#dcd0ff);display:flex;align-items:center;justify-content:center;font-size:42px">${t.cover}</div>
+   <div class="sub">${t.dates} · ${t.dest}</div>
+   <div class="row">
+     <div class="box" style="text-align:center"><div class="sub">ใช้ไป</div><b>${baht(tripTotal(t))} ฿</b></div>
+     <div class="box tap" style="text-align:center;cursor:pointer" data-nav="tripExpenses"><div class="sub">ค่าใช้จ่าย</div><b>ดู/แบ่งบิล ›</b></div>
+   </div>
+   <div class="sec">แผนเที่ยว (Itinerary)</div>
+   ${t.days.map(d=>`<div class="box"><b>${d.day}</b>${d.items.map(it=>`<div style="display:flex;gap:9px;margin-top:7px"><span>${it.icon}</span><div><div style="font-weight:600">${it.name}</div><div class="sub">${it.time}${it.note?' · '+it.note:''}</div></div></div>`).join('')}</div>`).join('')}
+   <div class="sec">อยากไป (Wishlist)</div>
+   <div class="chips">${t.wishlist.map(w=>`<span class="chip">${w}</span>`).join('')}<span class="chip tap" data-act="comingSoon">＋</span></div>
+   <button class="btn tap" data-nav="tripExpenses" style="margin-top:6px">💸 จัดการค่าใช้จ่าย</button>`);};
+
+/* ---- Trip expenses (split) ---- */
+V.tripExpenses=()=>{const t=S.trips[S.curTrip];const bal=tripBalance(t);
+  const who=bal>0?`${S.nickPartner} ติด ${S.nickMe} ${baht(Math.abs(bal))} ฿`:bal<0?`${S.nickMe} ติด ${S.nickPartner} ${baht(Math.abs(bal))} ฿`:'เคลียร์กันแล้ว 🎉';
+  return ab('‹ ค่าใช้จ่าย',{back:true,right:t.dest})+sc(
+  `<div class="card" style="text-align:center;background:linear-gradient(135deg,#fff0f5,#f1ecff)">
+     <div class="sub">รวมทั้งทริป</div><div class="big">${baht(tripTotal(t))} ฿</div>
+     <div class="box" style="margin-top:10px">${bal===0?'✅':'⚖️'} ${who}</div></div>
+   <div class="sec">รายการ</div>
+   ${t.expenses.map(e=>`<div class="box" style="display:flex;align-items:center;gap:10px">
+     <span style="font-size:18px">${e.icon||'🧾'}</span>
+     <div style="flex:1"><div style="font-weight:700">${e.title}</div><div class="sub">${e.paidBy==='me'?S.nickMe:S.nickPartner} จ่าย · แบ่ง ${splitLabel(e.meShare)}</div></div>
+     <b>${baht(e.amount)} ฿</b></div>`).join('')}
+   <div class="row">
+     <button class="btn tap" data-nav="addExpense">＋ เพิ่มรายการ</button>
+     <button class="btn ai tap" data-nav="tripAISummary">✨ AI สรุป</button>
+   </div>
+   ${bal!==0?`<button class="btn ok tap" data-act="settle">เคลียร์ยอด (จ่ายคืนแล้ว)</button>`:''}`);};
+
+/* ---- Add expense ---- */
+V.addExpense=()=>ab('‹ เพิ่มค่าใช้จ่าย',{back:true})+sc(
+  `<div class="fld"><div class="l">รายการ</div><input id="expTitle" placeholder="เช่น ค่าโรงแรม / มื้อเย็น"></div>
+   <div class="fld"><div class="l">จำนวนเงิน (฿)</div><input id="expAmount" type="number" inputmode="decimal" placeholder="0"></div>
+   <div class="sec">ใครจ่าย</div>
+   <div class="chips" data-grp="paid"><span class="chip on" data-val="me">${S.nickMe} จ่าย</span><span class="chip" data-val="partner">${S.nickPartner} จ่าย</span></div>
+   <div class="sec">แบ่งกันยังไง</div>
+   <div class="chips" data-grp="split"><span class="chip on" data-val="0.5">50/50</span><span class="chip" data-val="1">${S.nickMe} ออกหมด</span><span class="chip" data-val="0">${S.nickPartner} ออกหมด</span><span class="chip" data-val="0.7">${S.nickMe} 70%</span></div>
+   <div class="spacer"></div>
+   <button class="btn tap" data-act="addExpense">บันทึก</button>`);
+
+/* ---- Trip AI summary ---- */
+V.tripAISummary=()=>{const t=S.trips[S.curTrip];return ab('✨ AI สรุปทริป',{back:true,accent:'ai'})+sc(
+  `<div class="ai-card"><div class="t">🧠 สรุปทริป ${t.name}</div>ใช้ไปทั้งหมด <b>${baht(tripTotal(t))} ฿</b> · ${t.expenses.length} รายการ</div>
+   <div class="ai-card">หมวดที่ใช้เยอะสุด: <b>ที่พัก & อาหาร</b> 🏨🍽️</div>
+   <div class="ai-card">${tripBalance(t)===0?'ยอดเคลียร์กันเรียบร้อย 🎉':'อย่าลืมเคลียร์ยอดกันนะ ⚖️'}</div>
+   <div class="tip">✨ อยากให้สรุปนี้กลายเป็น “ไดอารี่ทริป” พร้อมรูปไหม?</div>
+   <button class="btn ai tap" data-act="tripToDiary" style="margin-top:auto">📔 สร้างไดอารี่ทริป</button>`);};
+
+/* ---- Relationship Journal ---- */
+V.journal=()=>ab('‹ ไดอารี่ความสัมพันธ์',{back:true,right:'＋'})+sc(
+  `<div class="sub">บันทึกสิ่งที่ขอบคุณกัน / สิ่งที่ได้เรียนรู้ในแต่ละวัน</div>
+   ${S.journal.map(j=>`<div class="box"><div class="sub">${j.date} · ${j.type==='thanks'?'🙏 ขอบคุณ':'🌱 เรียนรู้'}</div><div style="margin-top:4px">${j.text}</div></div>`).join('')}
+   <button class="btn tap" data-nav="journalAdd">＋ เขียนวันนี้</button>`);
+V.journalAdd=()=>ab('‹ เขียนวันนี้',{back:true})+sc(
+  `<div class="sec">วันนี้อยากบันทึกแบบไหน</div>
+   <div class="chips" data-grp="jtype"><span class="chip on" data-val="thanks">🙏 ขอบคุณ</span><span class="chip" data-val="learn">🌱 สิ่งที่เรียนรู้</span></div>
+   <div class="ai-card">💡 “วันนี้ ${S.nickPartner} ทำอะไรที่ทำให้คุณยิ้ม?”</div>
+   <div class="fld"><div class="l">บันทึก</div><input id="jText" placeholder="พิมพ์สิ่งที่อยากบอก…"></div>
+   <div class="spacer"></div>
+   <button class="btn tap" data-act="addJournal">บันทึก</button>`);
+
+/* ---- About Us Note ---- */
+V.about=()=>ab('‹ About Us — สิ่งที่ต้องจำ',{back:true,right:'＋'})+sc(
+  `<div class="sec">⚠️ แพ้ / ต้องระวัง</div>
+   ${S.aboutNotes.allergy.map(a=>`<div class="box">🚫 ${a}</div>`).join('')}
+   <div class="sec">🔑 Account ที่ใช้ร่วมกัน</div>
+   ${S.aboutNotes.accounts.map(a=>`<div class="box" style="display:flex;align-items:center;gap:10px"><span>${a.icon}</span><div style="flex:1"><b>${a.name}</b><div class="sub">${a.who}</div></div><span class="sub">🔒</span></div>`).join('')}
+   <div class="box" style="font-size:11px">🔒 ข้อมูลอ่อนไหวถูกเข้ารหัส · ไม่เก็บรหัสผ่านดิบ</div>
+   <button class="btn line tap" data-act="comingSoon">＋ เพิ่มโน้ต</button>`);
+
+/* ---- Milestones ---- */
+V.milestones=()=>ab('‹ Milestone ของเรา',{back:true,right:'＋'})+sc(
+  `<div class="sub">เป้าหมายที่อยากทำสำเร็จร่วมกัน</div>
+   ${S.milestones.map(m=>`<div class="box"><div style="display:flex;gap:9px"><span style="font-size:18px">${m.icon}</span><div style="flex:1"><b>${m.title}</b><div class="sub">${m.when}${m.loc?' · 📍'+m.loc:''}</div><div class="sub">เหตุผล: ${m.reason}</div></div>${m.done?'✅':'⏳'}</div></div>`).join('')}
+   <button class="btn tap" data-nav="milestoneAdd">＋ เพิ่ม Milestone</button>`);
+V.milestoneAdd=()=>ab('‹ เพิ่ม Milestone',{back:true})+sc(
+  `<div class="fld"><div class="l">ชื่อกิจกรรม</div><input id="msTitle" placeholder="เช่น ไปเที่ยวญี่ปุ่นด้วยกัน"></div>
+   <div class="fld"><div class="l">เมื่อไหร่</div><div class="v">ธ.ค. 2026</div></div>
+   <div class="fld"><div class="l">ปักหมุดโลเคชั่น</div><div class="v">📍 โตเกียว, ญี่ปุ่น</div></div>
+   <div class="sec">เหตุผล</div>
+   <div class="chips" data-grp="reason"><span class="chip on" data-val="สร้างความทรงจำใหม่ๆ">สร้างความทรงจำใหม่ๆ</span><span class="chip" data-val="ซ่อมแซมความสัมพันธ์">ซ่อมแซมความสัมพันธ์</span><span class="chip" data-val="เติบโต">เติบโต</span><span class="chip" data-val="อื่นๆ">อื่นๆ</span></div>
+   <div class="spacer"></div>
+   <button class="btn tap" data-act="addMilestone">บันทึก</button>`);
+
 /* ============ ACTIONS ============ */
 const ACT={
   saveNicks(){
@@ -660,6 +803,24 @@ const ACT={
   sooSend(){ nav('sooSent'); },
   sooForgive(){ nav('reconciled'); toast('คืนดีกันแล้ว 🎉'); },
   sooDefer(){ toast('ส่งว่า “ขอเวลาคิดแป๊บ” แล้ว 🕊️'); setTimeout(()=>{stack=['home'];render();},800); },
+  comingSoon(){ toast('เดี๋ยวทำในเวอร์ชันถัดไป ✨'); },
+  addExpense(){ const amt=parseFloat(document.getElementById('expAmount').value)||0;
+    if(amt<=0){toast('ใส่จำนวนเงินก่อนน้า 💸');return;}
+    const title=(document.getElementById('expTitle').value||'').trim()||'ค่าใช้จ่าย';
+    const paid=document.querySelector('#screen [data-grp="paid"] .chip.on')?.dataset.val||'me';
+    const sp=parseFloat(document.querySelector('#screen [data-grp="split"] .chip.on')?.dataset.val||'0.5');
+    const t=S.trips[S.curTrip]; t.expenses.push({title,amount:amt,paidBy:paid,meShare:sp,icon:'🧾'}); t.settled=false;
+    toast('เพิ่มค่าใช้จ่ายแล้ว 💸'); goBack(); },
+  settle(){ S.trips[S.curTrip].settled=true; toast('เคลียร์ยอดแล้ว 🎉'); render(); },
+  tripToDiary(){ const t=S.trips[S.curTrip]; S.diary.unshift({place:t.name,date:'ทริป',text:'ทริปสุดประทับใจของเรา ❤️',ph:true});
+    toast('สร้างไดอารี่ทริปแล้ว 📔'); setTimeout(()=>{stack=['home'];render();},700); },
+  addJournal(){ const txt=(document.getElementById('jText').value||'').trim()||('ขอบคุณที่มี '+S.nickPartner+' อยู่ข้างๆ');
+    const type=document.querySelector('#screen [data-grp="jtype"] .chip.on')?.dataset.val||'thanks';
+    S.journal.unshift({date:'วันนี้',type,text:txt}); toast('บันทึกแล้ว 📔'); goBack(); },
+  addMilestone(){ const t=(document.getElementById('msTitle').value||'').trim()||'เป้าหมายใหม่ของเรา';
+    const r=document.querySelector('#screen [data-grp="reason"] .chip.on')?.dataset.val||'สร้างความทรงจำใหม่ๆ';
+    S.milestones.unshift({title:t,when:'ธ.ค. 2026',loc:'โตเกียว, ญี่ปุ่น',reason:r,icon:'🎯',done:false});
+    toast('เพิ่ม Milestone แล้ว 🎯'); goBack(); },
 };
 function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
@@ -715,7 +876,9 @@ function simSheet(){
 function jumpSheet(){
   const items=[
     ['splash','Splash'],['ob1','Onboarding'],['pair','จับคู่'],['home','Home'],['chat','แชท'],['places','สถานที่'],
-    ['me','ฉัน'],['addp1','เพิ่มสถานที่'],['dates','วันสำคัญ'],['geo','ตั้งเตือนเข้าใกล้'],['soo1','ง้อ (AI)'],['recv1','มุมคนรับง้อ'],
+    ['me','ฉัน'],['addp1','เพิ่มสถานที่'],['dates','วันสำคัญ'],['geo','ตั้งเตือนเข้าใกล้'],
+    ['trips','ทริป'],['tripExpenses','ค่าใช้จ่ายทริป'],['journal','Journal'],['milestones','Milestone'],
+    ['about','About Us'],['distance','ระยะห่าง'],['soo1','ง้อ (AI)'],['recv1','มุมคนรับง้อ'],
   ];
   return `<div class="grab"></div><h3>กระโดดไปหน้า</h3><div class="sd">สำหรับ present — ข้ามไปหน้าจอไหนก็ได้</div>
     <div class="jumpgrid">${items.map(([k,la])=>`<button data-jump="${k}">${la}</button>`).join('')}</div>`;
