@@ -345,6 +345,10 @@
       <button class="tab" data-flow="A" role="tab">📍 สถานที่</button>
       <button class="tab" data-flow="B" role="tab">🎂 วันสำคัญ</button>
       <button class="tab" data-flow="D" role="tab">📡 เข้าใกล้</button>
+      <button class="tab" data-flow="T" role="tab">✈️ ทริป + ค่าใช้จ่าย</button>
+      <button class="tab" data-flow="J" role="tab">📔 Journal</button>
+      <button class="tab" data-flow="M" role="tab">🎯 Milestone</button>
+      <button class="tab" data-flow="N" role="tab">📒 About Us</button>
       <button class="tab" data-flow="C" role="tab">💔→❤️ AI ง้อ</button>
     </div>
   </div>
@@ -645,6 +649,165 @@ D:{label:'เข้าใกล้ที่เคยเดท',num:'D',accent:'r
     {cls:'ai-col',ct:'✨ ปรับด้วย AI (เฟส 2)',li:['AI แต่งข้อความให้สดใหม่ทุกครั้ง (ไม่ซ้ำ)','โยงความทรงจำของที่นั้น (วันที่/โน้ต) เข้ากับข้อความ']},
     {ct:'🎯 ปลายทางการกด',li:['แตะ push → การ์ดความทรงจำของที่นั้น','ปุ่ม “บอกว่าคิดถึง” (→ แชท) / “ชวนมาอีก” (→ สร้างเดท/วันสำคัญ)']},
     {ct:'🔌 API / Data',api:'(geofence trigger) → resolve template\n→ FCM 2 ฝั่ง (ข้อความต่างกัน)\nGET /places/:id/memory  (เปิดการ์ด)'},
+   ]},
+  ]},
+
+T:{label:'ทริป + ค่าใช้จ่าย',num:'T',accent:'rose',
+  title:'Trip Plan + Expense',
+  desc:'วางแผนเที่ยวคู่ (แนว Wanderlog) — itinerary รายวัน · แผนที่รวม · บันทึกค่าใช้จ่าย + แบ่งบิล + AI สรุป โดยผูกกับความทรงจำของเรา',
+  screens:[
+   {code:'T1',ttl:'ทริปของเรา',d:'รายการทริป + สร้างใหม่',
+    html:ab('ทริปของเรา','','＋')+sc(
+     `<div class="box" style="padding:0;overflow:hidden">
+        <div style="height:74px;background:linear-gradient(135deg,#ffd9e8,#dcd0ff);display:flex;align-items:center;justify-content:center;font-size:30px">🌊</div>
+        <div style="padding:10px"><div class="ttl">ทริปหัวหิน</div><div class="small">12–14 มิ.ย. · ใช้ไป 5,600 ฿ · 2 วัน</div></div></div>
+      <div class="box tap" style="text-align:center;margin-top:auto">＋ สร้างทริปใหม่</div>`)},
+   {code:'T2',ttl:'สร้างทริป',d:'ชื่อ · ช่วงวัน · ปลายทาง',
+    html:ab('‹ ทริปใหม่')+sc(
+     `<div class="box" style="height:84px;display:flex;align-items:center;justify-content:center;font-size:26px">🖼️ รูปปก</div>
+      <div class="fld"><div class="l">ชื่อทริป</div><div class="v">ทริปหัวหิน 🌊</div></div>
+      <div class="fld"><div class="l">ช่วงวันที่</div><div class="v">12–14 มิ.ย. 2025</div></div>
+      <div class="fld"><div class="l">ปลายทาง</div><div class="v">หัวหิน, ประจวบฯ</div></div>
+      <div class="btn tap" style="margin-top:auto">ถัดไป → วางแผน</div>`)},
+   {code:'T3',ttl:'Itinerary รายวัน',d:'เพิ่มที่/กิจกรรม · ลากจัดลำดับ',
+    html:ab('‹ ทริปหัวหิน','','แผน')+sc(
+     `<div class="box"><b>วันที่ 1</b>
+        <div style="display:flex;gap:8px;margin-top:6px"><span>🏨</span><div><div style="font-weight:600">เช็คอินโรงแรม</div><div class="small">14:00</div></div></div>
+        <div style="display:flex;gap:8px;margin-top:6px"><span>🦐</span><div><div style="font-weight:600">ซีฟู้ดริมทะเล</div><div class="small">18:30 · ร้านโปรด</div></div></div></div>
+      <div class="box"><b>วันที่ 2</b>
+        <div style="display:flex;gap:8px;margin-top:6px"><span>☕</span><div><div style="font-weight:600">คาเฟ่เปิดใหม่</div><div class="small">10:00</div></div></div></div>
+      <div class="box tap">＋ เพิ่มกิจกรรม</div>`)},
+   {code:'T4',ttl:'แผนที่รวม + Wishlist',d:'ปักทุกจุด · ที่อยากไป',
+    html:ab('‹ แผนที่ทริป')+sc(
+     `<div class="map" style="flex:none;height:150px">
+        <span class="pin" style="top:28%;left:30%">🏨</span><span class="pin" style="top:54%;left:60%">🦐</span><span class="pin" style="top:70%;left:34%">☕</span></div>
+      <div class="sec">อยากไป (Wishlist)</div>
+      <div class="chips"><span class="chip">ตลาดน้ำ</span><span class="chip">ไร่องุ่น</span><span class="chip">ร้านชาบู</span><span class="chip">＋</span></div>
+      <div class="small">ลากจาก Wishlist เข้าวันในแผนได้ · ทุกจุดปักบน Google Maps</div>`)},
+   {code:'T5',ttl:'ค่าใช้จ่าย',d:'รวมยอด + ใครติดใคร',
+    html:ab('‹ ค่าใช้จ่าย','','หัวหิน')+sc(
+     `<div class="box sel" style="text-align:center"><div class="small">รวมทั้งทริป</div><div class="big">5,600 ฿</div><div class="small">⚖️ เบบี๋ ติด ปุ้ย 1,600 ฿</div></div>
+      <div class="box" style="display:flex;gap:8px;align-items:center"><span>🏨</span><div style="flex:1"><b>โรงแรม 2 คืน</b><div class="small">ปุ้ย จ่าย · แบ่ง 50/50</div></div><b>3,600 ฿</b></div>
+      <div class="box" style="display:flex;gap:8px;align-items:center"><span>🦐</span><div style="flex:1"><b>ซีฟู้ด</b><div class="small">เบบี๋ จ่าย · แบ่ง 50/50</div></div><b>1,200 ฿</b></div>
+      <div class="btn tap" style="margin-top:auto">＋ เพิ่มค่าใช้จ่าย</div>`)},
+   {code:'T6',ttl:'เพิ่ม + แบ่งบิล',d:'ใครจ่าย · 50/50 · %',
+    html:ab('‹ เพิ่มค่าใช้จ่าย')+sc(
+     `<div class="fld"><div class="l">รายการ</div><div class="v">ค่าน้ำมัน</div></div>
+      <div class="fld"><div class="l">จำนวนเงิน</div><div class="v">800 ฿</div></div>
+      <div class="sec">ใครจ่าย</div>
+      <div class="chips"><span class="chip on">ปุ้ย</span><span class="chip">เบบี๋</span></div>
+      <div class="sec">แบ่งกันยังไง</div>
+      <div class="chips"><span class="chip on">50/50</span><span class="chip">ปุ้ยออกหมด</span><span class="chip">เบบี๋ออกหมด</span><span class="chip">กำหนด %</span></div>
+      <div class="btn tap" style="margin-top:auto">บันทึก</div>`)},
+   {code:'T7',ttl:'AI สรุปทริป',d:'สรุปยอด → ไดอารี่ทริป',
+    html:ab('✨ AI สรุปทริป','ai')+sc(
+     `<div class="ai-card"><div class="t">🧠 สรุปทริปหัวหิน</div>ใช้ไป <b>5,600 ฿</b> · 3 รายการ · หมวดเยอะสุด: ที่พัก & อาหาร</div>
+      <div class="ai-card">⚖️ เบบี๋ ติด ปุ้ย 1,600 ฿ — อย่าลืมเคลียร์กันนะ</div>
+      <div class="tip">✨ อยากให้สรุปนี้กลายเป็น “ไดอารี่ทริป” พร้อมรูปไหม?</div>
+      <div class="btn ai tap" style="margin-top:auto">📔 สร้างไดอารี่ทริป</div>`)},
+  ],
+  notes:[
+   {range:[0,3],seg:'วางแผนทริป (แนว Wanderlog)',cards:[
+    {ct:'📝 สร้างทริป & แผน',li:['ชื่อ · ช่วงวัน · ปลายทาง · รูปปก','Itinerary รายวัน: เพิ่มที่/กิจกรรม · เวลา/โน้ต · ลากจัดลำดับ','Wishlist “อยากไป” → ลากเข้าวัน']},
+    {ct:'🗺️ แผนที่รวม',li:['ทุกจุดปักบน Google Maps อัตโนมัติ','เห็นเส้นทางรายวัน · จัดจุดใกล้กันให้อยู่ด้วยกัน','วางแผนร่วมกัน 2 คน realtime']},
+    {cls:'edge',ct:'⚠️ ขอบเขต',li:['MVP เริ่ม itinerary + แผนที่ + wishlist ก่อน','import ตั๋ว/โรงแรมจากอีเมล = เฟสหลัง','Checklist เตรียมตัวเพิ่มทีหลัง']},
+    {ct:'🔌 API / Data',api:'POST /trips {name,dates,dest,cover}\nPOST /trips/:id/items {placeId,day,time,order}\ntrip ↔ places (ผูกความทรงจำ)'},
+   ]},
+   {range:[4,6],seg:'ค่าใช้จ่าย · แบ่งบิล · AI',cards:[
+    {ct:'💸 บันทึก & แบ่งบิล',li:['ต่อทริป/วัน · หมวด · ใครจ่าย','แบ่ง: 50/50 · ใครออกหมด · กำหนด %/บาท','สรุป “ใครติดใครเท่าไหร่” + เคลียร์ยอด','ตั้งงบ + เตือนใกล้เกิน']},
+    {cls:'ai-col',ct:'✨ AI สรุป',li:['รวมยอด + ไฮไลต์การใช้จ่าย','ต่อยอดเป็น “ไดอารี่ทริป” อัตโนมัติ (Premium)']},
+    {cls:'edge',ct:'⚠️ Edge cases',li:['หารไม่ลงตัว → ปัดเศษให้ชัด','แก้/ลบรายการ → คำนวณยอดใหม่','สกุลเงินต่างประเทศ (เฟสหลัง)']},
+    {ct:'🔌 API / Data',api:'POST /trips/:id/expenses\n {title,amount,paidBy,split}\nGET /trips/:id/balance → ใครติดใคร'},
+   ]},
+  ]},
+
+J:{label:'Journal',num:'J',accent:'rose',
+  title:'Relationship Journal',
+  desc:'บันทึกสิ่งที่อยากขอบคุณกัน หรือสิ่งที่ได้เรียนรู้จากความสัมพันธ์ในแต่ละวัน',
+  screens:[
+   {code:'J1',ttl:'ไดอารี่ความสัมพันธ์',d:'รายการบันทึก',
+    html:ab('ไดอารี่ความสัมพันธ์','','＋')+sc(
+     `<div class="box"><div class="small">เมื่อวาน · 🙏 ขอบคุณ</div>ขอบคุณที่มารับตอนฝนตก ☔</div>
+      <div class="box"><div class="small">2 วันก่อน · 🌱 เรียนรู้</div>เวลาโกรธ ต้องพักก่อนค่อยคุย</div>
+      <div class="box tap" style="margin-top:auto">＋ เขียนวันนี้</div>`)},
+   {code:'J2',ttl:'เลือกประเภท',d:'ขอบคุณ / เรียนรู้',
+    html:ab('‹ เขียนวันนี้')+sc(
+     `<div class="sec">วันนี้อยากบันทึกแบบไหน</div>
+      <div class="chips"><span class="chip on">🙏 ขอบคุณ</span><span class="chip">🌱 สิ่งที่เรียนรู้</span></div>
+      <div class="ai-card">💡 “วันนี้เบบี๋ทำอะไรที่ทำให้คุณยิ้ม?”</div>
+      <div class="btn tap" style="margin-top:auto">เขียนเลย</div>`)},
+   {code:'J3',ttl:'เขียน + บันทึก',d:'+ ตั้งเตือน',
+    html:ab('‹ ขอบคุณ')+sc(
+     `<div class="fld"><div class="l">บันทึกของวันนี้</div><div class="v">ขอบคุณที่อดทนกับฉันเสมอ ❤️</div></div>
+      <div class="box sel">🔔 เตือนให้เขียน Journal ทุกเย็น 1 ทุ่ม ✓</div>
+      <div class="btn tap" style="margin-top:auto">บันทึก</div>`)},
+  ],
+  notes:[
+   {range:[0,2],seg:'Journal — ขอบคุณ & เรียนรู้',cards:[
+    {ct:'📝 เก็บอะไร',li:['ประเภท: ขอบคุณ / key learning','ข้อความ + วันที่','มี prompt ช่วยเขียน']},
+    {ct:'⚙️ Logic',li:['เตือนให้เขียนตามเวลาที่ตั้ง','ดูย้อนหลังเป็นไทม์ไลน์','ต่างจาก “ไดอารี่สถานที่” — อันนี้เน้นความรู้สึก']},
+    {cls:'ai-col',ct:'✨ AI (เฟส 2)',li:['สรุปรายสัปดาห์/เดือน','ดึงแง่บวกมาเตือนตอนทะเลาะ']},
+    {ct:'🔌 API / Data',api:'POST /journal\n {type:thanks|learn, text, date}'},
+   ]},
+  ]},
+
+M:{label:'Milestone',num:'M',accent:'rose',
+  title:'Milestone ของเรา',
+  desc:'เป้าหมายที่อยากทำสำเร็จร่วมกัน — ใส่กิจกรรม ปักหมุดโลเคชั่น และเหตุผล',
+  screens:[
+   {code:'M1',ttl:'Milestone',d:'รายการเป้าหมาย',
+    html:ab('Milestone ของเรา','','＋')+sc(
+     `<div class="box"><div style="display:flex;gap:8px"><span>🗾</span><div style="flex:1"><b>เก็บเงินเที่ยวญี่ปุ่น</b><div class="small">ธ.ค. 2026 · 📍โตเกียว · สร้างความทรงจำใหม่ๆ</div></div>⏳</div></div>
+      <div class="box"><div style="display:flex;gap:8px"><span>🏃</span><div style="flex:1"><b>วิ่งมาราธอนด้วยกัน</b><div class="small">ก.พ. 2026 · เติบโต</div></div>✅</div></div>
+      <div class="box tap" style="margin-top:auto">＋ เพิ่ม Milestone</div>`)},
+   {code:'M2',ttl:'เพิ่ม Milestone',d:'ชื่อ · เมื่อไหร่ · location · เหตุผล',
+    html:ab('‹ เพิ่ม Milestone')+sc(
+     `<div class="fld"><div class="l">ชื่อกิจกรรม</div><div class="v">ไปเที่ยวญี่ปุ่นด้วยกัน</div></div>
+      <div class="fld"><div class="l">เมื่อไหร่</div><div class="v">ธ.ค. 2026</div></div>
+      <div class="fld"><div class="l">ปักหมุดโลเคชั่น</div><div class="v">📍 โตเกียว, ญี่ปุ่น</div></div>
+      <div class="sec">เหตุผล</div>
+      <div class="chips"><span class="chip on">สร้างความทรงจำใหม่ๆ</span><span class="chip">ซ่อมแซมความสัมพันธ์</span><span class="chip">เติบโต</span><span class="chip">อื่นๆ</span></div>
+      <div class="btn tap" style="margin-top:auto">บันทึก</div>`)},
+   {code:'M3',ttl:'เพิ่มแล้ว',d:'ขึ้น timeline',
+    html:ab('เพิ่มแล้ว 🎯','rose')+sc(
+     `<div class="emoji">🎯</div><div class="h">ตั้งเป้าหมายร่วมกันแล้ว</div>
+      <div class="small">ขึ้นใน timeline · จะเตือนเมื่อใกล้ถึงเวลา</div>
+      <div class="btn line tap" style="width:100%">ดู Milestone ทั้งหมด ↺</div>`,'center')},
+  ],
+  notes:[
+   {range:[0,2],seg:'Milestone — เป้าหมายร่วม',cards:[
+    {ct:'📝 ฟิลด์',li:['ชื่อกิจกรรม · คำอธิบาย','เมื่อไหร่ (เดือน/ปี) · ปักหมุดโลเคชั่น','เหตุผล (dropdown)']},
+    {ct:'🎯 เหตุผล (dropdown)',li:['สร้างความทรงจำใหม่ๆ','ซ่อมแซมความสัมพันธ์','เติบโต · อื่นๆ']},
+    {cls:'edge',ct:'⚙️ Logic',li:['สถานะ ทำแล้ว/ยัง','เตือนเมื่อใกล้ถึง','ทำสำเร็จ → ชวนบันทึกเป็นความทรงจำ']},
+    {ct:'🔌 API / Data',api:'POST /milestones\n {title,desc,when,location,reason,done}'},
+   ]},
+  ]},
+
+N:{label:'About Us',num:'N',accent:'rose',
+  title:'About Us Note',
+  desc:'สิ่งที่ต้องจำเกี่ยวกับอีกฝ่าย — ของแพ้/ยา และ account ที่ใช้ร่วมกัน',
+  screens:[
+   {code:'N1',ttl:'About Us',d:'แพ้/ยา + accounts',
+    html:ab('About Us — สิ่งที่ต้องจำ','','＋')+sc(
+     `<div class="sec">⚠️ แพ้ / ต้องระวัง</div>
+      <div class="box">🚫 กุ้ง (แพ้)</div><div class="box">🚫 ยา Penicillin</div>
+      <div class="sec">🔑 Account ที่ใช้ร่วมกัน</div>
+      <div class="box" style="display:flex;gap:8px;align-items:center"><span>🎬</span><div style="flex:1"><b>Netflix</b><div class="small">จ่ายโดย ปุ้ย</div></div>🔒</div>
+      <div class="box" style="display:flex;gap:8px;align-items:center"><span>🎵</span><div style="flex:1"><b>Spotify Duo</b><div class="small">จ่ายโดย เบบี๋</div></div>🔒</div>`)},
+   {code:'N2',ttl:'เพิ่มโน้ต',d:'ประเภท + เข้ารหัส',
+    html:ab('‹ เพิ่มโน้ต')+sc(
+     `<div class="sec">ประเภท</div>
+      <div class="chips"><span class="chip on">⚠️ แพ้/ยา</span><span class="chip">🔑 Account</span><span class="chip">📝 อื่นๆ</span></div>
+      <div class="fld"><div class="l">รายละเอียด</div><div class="v">Disney+ — ใช้ร่วมกัน</div></div>
+      <div class="box">🔒 ข้อมูลอ่อนไหวถูกเข้ารหัส · ไม่เก็บรหัสผ่านดิบ</div>
+      <div class="btn tap" style="margin-top:auto">บันทึก</div>`)},
+  ],
+  notes:[
+   {range:[0,1],seg:'About Us — สิ่งที่ต้องจำ',cards:[
+    {ct:'📝 เก็บอะไร',li:['ของแพ้ / ยา ที่ต้องระวัง','account streaming (Netflix/Disney/Spotify)','เรื่องสำคัญอื่นๆ ที่ไม่อยากลืม']},
+    {cls:'edge',ct:'⚠️ ความปลอดภัย',li:['เข้ารหัสจัดเก็บ','ไม่เก็บรหัสผ่านดิบ — เก็บเป็นป้าย/ผู้จ่าย','เห็นเฉพาะ 2 คน']},
+    {ct:'⚙️ Logic',li:['จัดกลุ่มตามประเภท','ของแพ้ → AI ใช้ตอนแนะร้านอาหาร']},
+    {ct:'🔌 API / Data',api:'POST /about-notes\n {type, label, value(encrypted)}'},
    ]},
   ]},
 
